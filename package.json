@@ -1,0 +1,33 @@
+{
+  "name": "matryoshka",
+  "version": "0.0.1",
+  "description": "A multi-layered encryption protocol for safely sending messages end-to-end.",
+  "main": "dist/matryoshka.js",
+  "scripts": {
+    "test": "haha no"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/robmclarty/matryoshka.git"
+  },
+  "keywords": [
+    "encryption",
+    "end-to-end",
+    "aes",
+    "ecdh",
+    "diffie",
+    "hellman",
+    "webcrypto"
+  ],
+  "author": "Rob McLarty",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/robmclarty/matryoshka/issues"
+  },
+  "homepage": "https://github.com/robmclarty/matryoshka#readme",
+  "dependencies": {
+    "gulp": "3.9.1",
+    "require-dir": "0.3.1",
+    "yargs": "6.4.0"
+  }
+}

@@ -1,8 +1,9 @@
 'use strict'
 
-const init = () => {
+const sanity = () => {
+  return 'it worked!'
 }
 
-modules.exports = {
-  init
+module.exports = {
+  sanity
 }

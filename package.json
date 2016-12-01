@@ -4,11 +4,14 @@
   "description": "A multi-layered encryption protocol for safely sending messages end-to-end.",
   "main": "dist/matryoshka.js",
   "scripts": {
-    "test": "node tests/index.js"
+    "test": "tape tests/**/*.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/robmclarty/matryoshka.git"
+  },
+  "engines": {
+    "node": ">= 6.2.2"
   },
   "keywords": [
     "encryption",
@@ -25,7 +28,8 @@
     "url": "https://github.com/robmclarty/matryoshka/issues"
   },
   "homepage": "https://github.com/robmclarty/matryoshka#readme",
-  "dependencies": {
+  "devDependencies": {
+    "babel-register": "6.18.0",
     "gulp": "3.9.1",
     "require-dir": "0.3.1",
     "tape": "4.6.3",

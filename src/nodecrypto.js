@@ -41,8 +41,8 @@ const encrypt_AES_GCM = (data, key) => new Promise((resolve, reject) => {
   console.log('key: ', base64.fromByteArray(key))
 
   const encryptor = crypto.createCipheriv('aes-256-gcm', key, iv)
-  const encryptedData = encryptor.update(data, 'utf8')
-  encryptor.final()
+  let encryptedData = encryptor.update(data, 'utf8')
+  encryptedData = Buffer.concat([encryptedData, encryptor.final()])
 
   const mac = encryptor.getAuthTag()
 
@@ -70,8 +70,8 @@ const decrypt_AES_GCM = (data, key, iv, mac) => new Promise((resolve, reject) =>
   const decryptor = crypto.createDecipheriv('aes-256-gcm', key, iv)
   decryptor.setAuthTag(mac)
 
-  const decryptedData = decryptor.update(data)
-  decryptor.final()
+  let decryptedData = decryptor.update(data)
+  decryptedData = Buffer.concat([decryptedData, decryptor.final()])
 
   resolve({
     data: decryptedData
@@ -115,8 +115,6 @@ const decrypt_AES_CBC_HMAC = (data, key, iv, mac) => new Promise((resolve, rejec
       const decryptor = crypto.createDecipheriv('aes-256-cbc', key, iv)
       let decryptedData = decryptor.update(data)
       decryptedData = Buffer.concat([decryptedData, decryptor.final()])
-
-      //console.log('decrypted: ', Buffer.from(decryptedData).toString('utf8'))
 
       resolve({
         data: decryptedData

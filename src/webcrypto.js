@@ -1,15 +1,19 @@
 'use strict'
 
-const crypto = window.crypto
+const hasWebCrypto = () => {
+  return typeof window !== 'undefined' &&
+    window.crypto &&
+    window.crypto.subtle &&
+    typeof window.crypto.getRandomValues === 'function'
+}
+
+//const crypto = typeof window === 'function' ? window.crypto : null
+const crypto = hasWebCrypto() ? window.crypto : null
 const base64 = require('base64-js')
 const { verifyMac } = require('./helpers')
 
 const getRandomBytes = size => {
-  const array = new Uint8Array(size)
-
-  crypto.getRandomValues(array)
-
-  return array.buffer
+  return crypto.getRandomValues(new Uint8Array(size))
 }
 
 const sign = (data, key) => {
@@ -61,7 +65,7 @@ const encrypt_AES_GCM = (data, key) => {
     .catch(err => console.log('error encrypting message with webcrypto AES-GCM: ', err))
 }
 
-const decrypt_AES_GCM = (data, key, iv) => {
+const decrypt_AES_GCM = (data, key, iv, mac) => {
   console.log('-------------------------------------')
   console.log('decrypting with web crypto AES-GCM...')
   console.log('-------------------------------------')
@@ -83,24 +87,23 @@ const encrypt_AES_CBC_HMAC = (data, key) => {
   console.log('------------------------------------------')
 
   const iv = getRandomBytes(16)
+  let encryptedData = []
+
+  console.log('iv: ', base64.fromByteArray(iv))
+  console.log('key: ', base64.fromByteArray(key))
 
   return crypto.subtle.importKey('raw', key, { name: 'AES-CBC' }, false, ['encrypt'])
     .then(importedKey => crypto.subtle.encrypt({ name: 'AES-CBC', iv }, importedKey, data))
-    .then(encryptedObj => new Uint8Array(encryptedObj))
-    .then(encryptedData => Promise.all([
-      encryptedData,
-      sign(encryptedData, key)
-    ]))
-    .then(results => {
-      const encryptedData = results[0]
-      const mac = results[1]
-
-      return {
-        data: new Uint8Array(encryptedData),
-        iv,
-        mac: new Uint8Array(mac)
-      }
+    .then(encryptedObj => {
+      encryptedData = new Uint8Array(encryptedObj)
+      return encryptedData
     })
+    .then(encryptedData => sign(encryptedData, key))
+    .then(mac => ({
+      data: encryptedData,
+      iv,
+      mac: new Uint8Array(mac)
+    }))
     .catch(err => console.log('error encrypting message with webcrypto aes-cbc: ', err))
 }
 
@@ -108,6 +111,10 @@ const decrypt_AES_CBC_HMAC = (data, key, iv, mac) => {
   console.log('------------------------------------------')
   console.log('decrypting with web crypto AES-CBC-HMAC...')
   console.log('------------------------------------------')
+
+  console.log('iv: ', base64.fromByteArray(iv))
+  console.log('key: ', base64.fromByteArray(key))
+  console.log('mac: ', base64.fromByteArray(mac))
 
   return verify(data, key, mac, mac.byteLength)
     .then(() => crypto.subtle.importKey('raw', key, { name: 'AES-CBC' }, false, ['decrypt']))

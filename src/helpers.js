@@ -1,5 +1,7 @@
 'use strict'
 
+const base64 = require('base64-js')
+
 // array buffer <-> string (from https://developers.google.com/web/updates/2012/06/How-to-convert-ArrayBuffer-to-and-from-String)
 // -----------------------
 const ab2str = buf => {
@@ -71,17 +73,17 @@ const verifyMac = (data, key, mac, calculatedMac, length) => {
     result = result | (a[i] ^ b[i])
   }
 
-  console.log('calculated mac: ', base64.fromByteArray(a))
-  console.log('original mac: ', base64.fromByteArray(b))
-  console.log('result: ', result)
-
-  if (result !== 0) {
-    console.log('Our MAC: ', base64.fromByteArray(a))
-    console.log('Their MAC: ', base64.fromByteArray(b))
-    throw new Error('Bad MAC')
+  if (result === 0) {
+    console.log('*message is authentic*')
+    console.log('calculated mac: ', base64.fromByteArray(a))
+    console.log('original mac: ', base64.fromByteArray(b))
   }
 
-  return true
+  if (result !== 0) {
+    console.log('calculated mac: ', base64.fromByteArray(a))
+    console.log('original mac: ', base64.fromByteArray(b))
+    throw new Error('bad mac')
+  }
 }
 
 module.exports = {

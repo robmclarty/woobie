@@ -17,7 +17,7 @@ const sign = (data, key) => new Promise((resolve, reject) => {
 
 const verify = (data, key, mac, length) => {
   return sign(data, key)
-    .then(calculatedMac => verifyMac(data, key, mac, calculatedMac, length)
+    .then(calculatedMac => verifyMac(data, key, mac, calculatedMac, length))
 }
 
 const hash = data => new Promise((resolve, reject) => {
@@ -44,11 +44,11 @@ const encrypt_AES_GCM = (data, key) => new Promise((resolve, reject) => {
   const encryptedData = encryptor.update(data, 'utf8')
   encryptor.final()
 
-  const tag = encryptor.getAuthTag()
+  const mac = encryptor.getAuthTag()
 
   resolve({
     data: encryptedData,
-    tag,
+    mac,
     iv
   })
 })
@@ -58,17 +58,17 @@ const encrypt_AES_GCM = (data, key) => new Promise((resolve, reject) => {
 // @param {Uint8Array} key - The secret key used to encrypt the ciphertext.
 // @param {Uint8Array} iv - The initialization vecotr used in the encryption.
 // @param {Uint8Array} tag - The authentication tag used by AES-GCM.
-const decrypt_AES_GCM = (data, key, iv, tag) => new Promise((resolve, reject) => {
+const decrypt_AES_GCM = (data, key, iv, mac) => new Promise((resolve, reject) => {
   console.log('--------------------------------------')
   console.log('decrypting with node crypto AES-GCM...')
   console.log('--------------------------------------')
 
   console.log('key: ', base64.fromByteArray(key))
   console.log('iv: ', base64.fromByteArray(iv))
-  console.log('tag: ', base64.fromByteArray(tag))
+  console.log('mac: ', base64.fromByteArray(mac))
 
   const decryptor = crypto.createDecipheriv('aes-256-gcm', key, iv)
-  decryptor.setAuthTag(tag)
+  decryptor.setAuthTag(mac)
 
   const decryptedData = decryptor.update(data)
   decryptor.final()
@@ -89,21 +89,40 @@ const encrypt_AES_CBC_HMAC = (data, key) => new Promise((resolve, reject) => {
   console.log('key: ', base64.fromByteArray(key))
 
   const encryptor = crypto.createCipheriv('aes-256-cbc', key, iv)
-  const encryptedData = encryptor.update(data, 'utf8')
-  encryptor.final()
+  let encryptedData = encryptor.update(data, 'utf8')
+  encryptedData = Buffer.concat([encryptedData, encryptor.final()])
 
-  sign(data, key)
+  sign(encryptedData, key)
     .then(mac => resolve({
       data: encryptedData,
       iv,
-      mac: new Uint8Array(mac)
+      mac
     }))
+    .catch(err => console.log('error encrypting message with nodecrypto aes-cbc: ', err))
 })
 
 const decrypt_AES_CBC_HMAC = (data, key, iv, mac) => new Promise((resolve, reject) => {
   console.log('-------------------------------------------')
   console.log('decrypting with node crypto AES-CBC-HMAC...')
   console.log('-------------------------------------------')
+
+  console.log('key: ', base64.fromByteArray(key))
+  console.log('iv: ', base64.fromByteArray(iv))
+  console.log('mac: ', base64.fromByteArray(mac))
+
+  return verify(data, key, mac, mac.byteLength)
+    .then(() => {
+      const decryptor = crypto.createDecipheriv('aes-256-cbc', key, iv)
+      let decryptedData = decryptor.update(data)
+      decryptedData = Buffer.concat([decryptedData, decryptor.final()])
+
+      //console.log('decrypted: ', Buffer.from(decryptedData).toString('utf8'))
+
+      resolve({
+        data: decryptedData
+      })
+    })
+    .catch(err => console.log('error decrypting message with nodecrypto aes-cbc: ', err))
 })
 
 module.exports = {

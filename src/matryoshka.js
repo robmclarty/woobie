@@ -1,6 +1,5 @@
 'use strict'
 
-const sodium = require('libsodium-wrappers')
 const pako = require('pako')
 const base64 = require('base64-js')
 const curve25519 = require('./curve25519')

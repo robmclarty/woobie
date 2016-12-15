@@ -21,10 +21,11 @@
     "diffie hellman",
     "webcrypto",
     "crypto",
-    "zero knowledge"
+    "zero knowledge",
+    "curve25519"
   ],
   "author": "Rob McLarty",
-  "license": "UNLICENSED",
+  "license": "Unlicense",
   "bugs": {
     "url": "https://github.com/robmclarty/matryoshka/issues"
   },

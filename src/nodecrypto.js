@@ -5,7 +5,7 @@ const base64 = require('base64-js')
 const { verifyMac } = require('./helpers')
 
 const getRandomBytes = size => {
-  return crypto.randomBytes(16)
+  return crypto.randomBytes(size)
 }
 
 const sign = (data, key) => new Promise((resolve, reject) => {
@@ -53,11 +53,15 @@ const encrypt_AES_GCM = (data, key) => new Promise((resolve, reject) => {
   })
 })
 
-// Takes a string or buffer and returns a decrypted string.
-// @param {Uint8Array} msg - The ciphertext message you want to decrypt.
-// @param {Uint8Array} key - The secret key used to encrypt the ciphertext.
-// @param {Uint8Array} iv - The initialization vecotr used in the encryption.
-// @param {Uint8Array} tag - The authentication tag used by AES-GCM.
+/**
+ * Takes a string or buffer and returns a decrypted string.
+ *
+ * @param {Uint8Array} msg - The ciphertext message you want to decrypt.
+ * @param {Uint8Array} key - The secret key used to encrypt the ciphertext.
+ * @param {Uint8Array} iv - The initialization vecotr used in the encryption.
+ * @param {Uint8Array} tag - The authentication tag used by AES-GCM.
+ * @return {Object} An object containing the decrypted data.
+ */
 const decrypt_AES_GCM = (data, key, iv, mac) => new Promise((resolve, reject) => {
   console.log('--------------------------------------')
   console.log('decrypting with node crypto AES-GCM...')

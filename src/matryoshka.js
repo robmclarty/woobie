@@ -8,16 +8,21 @@ const webcrypto = require('./webcrypto')
 const nodecrypto = require('./nodecrypto')
 const sodiumcrypto = require('./sodium')
 
+// TODO: Don't use all these switches in each function at this level. Instead
+// wrap the switch in another level of abstraction from which there could be
+// a global "crypto" variable which can simply be used here at this level without
+// knowing the actual library that is being used.
+
 const CRYPTO_LIBS = {
   WEBCRYPTO: 'webcrypto',
-  NODE: 'node',
-  SODIUM: 'sodium'
+  NODE: 'node'
 }
 
 const algorithm = 'aes-256-gcm'
 const dhBitDepth = 2048
 const rsaBitDepth = 4096
 const aesBitDepth = 256
+const keySize = 32
 
 // feature detection
 // -----------------
@@ -49,7 +54,20 @@ const chooseCrypto = () => {
   if (hasWebCrypto()) return CRYPTO_LIBS.WEBCRYPTO
   if (!hasWebCrypto() && hasNodeCrypto()) return CRYPTO_LIBS.NODE
 
-  return CRYPTO_LIBS.SODIUM
+  return CRYPTO_LIBS.WEBCRYPTO
+}
+
+const generateRandomBytes = ({
+  lib = CRYPTO_LIBS_WEBCRYPTO,
+  size = 32
+}) => {
+  switch(lib) {
+  case CRYPTO_LIBS.NODE:
+    return nodecrypto.getRandomBytes(size)
+  case CRYPTO_LIBS.WEBCRYPTO:
+  default:
+    return webcrypto.getRandomBytes(size)
+  }
 }
 
 // select crypto library
@@ -76,11 +94,6 @@ const encrypt = ({
     encryptedPromise = alg === 'aes-gcm' ?
       nodecrypto.encrypt_AES_GCM(msgAsBytes, keyAsBytes) :
       nodecrypto.encrypt_AES_CBC_HMAC(msgAsBytes, keyAsBytes)
-    break
-  case CRYPTO_LIBS.SODIUM:
-    encryptedPromise = alg === 'aes-gcm' ?
-      sodiumcrypto.encryptSodium(msgAsBytes, keyAsBytes) :
-      sodiumcrypto.encryptSodium(msgAsBytes, keyAsBytes)
     break
   case CRYPTO_LIBS.WEBCRYPTO:
   default:
@@ -120,11 +133,6 @@ const decrypt = ({
       nodecrypto.decrypt_AES_GCM(msgAsBytes, keyAsBytes, ivAsBytes, macAsBytes) :
       nodecrypto.decrypt_AES_CBC_HMAC(msgAsBytes, keyAsBytes, ivAsBytes, macAsBytes)
     break
-  case CRYPTO_LIBS.SODIUM:
-    decryptedPromise = alg === 'aes-gcm' ?
-      sodiumcrypto.decryptSodium(msgAsBytes, keyAsBytes, ivAsBytes, macAsBytes) :
-      sodiumcrypto.decryptSodium(msgAsBytes, keyAsBytes, ivAsBytes, macAsBytes)
-    break
   case CRYPTO_LIBS.WEBCRYPTO:
   default:
     decryptedPromise = alg === 'aes-gcm' ?
@@ -140,8 +148,15 @@ const decrypt = ({
 }
 
 const fullTest = () => {
+  console.log('-----------------')
+  console.log('choose crypto lib')
+  console.log('-----------------')
+
+  const cryptolib = chooseCrypto()
+
   console.log('webcrypto: ', hasWebCrypto())
   console.log('nodecrypto: ', hasNodeCrypto())
+  console.log('chosen cryptolib: ', cryptolib)
 
   // generate keys
   console.log('---------------------------')
@@ -149,52 +164,51 @@ const fullTest = () => {
   console.log('---------------------------')
 
   // Create pub/priv keys for alice
-  const alice_secretKey = Uint8Array.from(sodium.randombytes_buf(sodium.crypto_scalarmult_SCALARBYTES))
-  const alice_secretKeyStr = base64.fromByteArray(alice_secretKey)
-  const alice_publicKey = sodium.crypto_scalarmult_base(alice_secretKey)
-  const alice_publicKeyStr = base64.fromByteArray(alice_publicKey)
+  const aliceKeys = curve25519.keyPair(generateRandomBytes({
+    lib: cryptolib,
+    size: 32
+  }))
+  const alice_secretKeyStr = base64.fromByteArray(aliceKeys.secretKey)
+  const alice_publicKeyStr = base64.fromByteArray(aliceKeys.publicKey)
 
   console.log('alice secret: ', alice_secretKeyStr)
   console.log('alice pub: ', alice_publicKeyStr)
 
   // Create pub/priv keys for bob
-  const bob_secretKey = Uint8Array.from(sodium.randombytes_buf(sodium.crypto_scalarmult_SCALARBYTES))
-  const bob_secretKeyStr = base64.fromByteArray(bob_secretKey)
-  const bob_publicKey = sodium.crypto_scalarmult_base(bob_secretKey)
-  const bob_publicKeyStr = base64.fromByteArray(bob_publicKey)
+  const bobKeys = curve25519.keyPair(generateRandomBytes({
+    lib: cryptolib,
+    size: 32
+  }))
+  const bob_secretKeyStr = base64.fromByteArray(bobKeys.secretKey)
+  const bob_publicKeyStr = base64.fromByteArray(bobKeys.publicKey)
 
   console.log('bob secret: ', bob_secretKeyStr)
   console.log('bob pub: ', bob_publicKeyStr)
 
-  // Convert string keys from network back into buffers.
-  const alice_publicKeyBytes = base64.toByteArray(alice_publicKeyStr)
-  const bob_publicKeyBytes = base64.toByteArray(bob_publicKeyStr)
-
   // Using new buffers for public keys create shared secret from them.
-  const alice_sharedSecret = base64.fromByteArray(sodium.crypto_scalarmult(alice_secretKey, bob_publicKeyBytes))
-  const bob_sharedSecret = base64.fromByteArray(sodium.crypto_scalarmult(bob_secretKey, alice_publicKeyBytes))
+  const alice_sharedSecret = curve25519.sharedSecret(aliceKeys.secretKey, bobKeys.publicKey)
+  const bob_sharedSecret = curve25519.sharedSecret(bobKeys.secretKey, aliceKeys.publicKey)
 
-  console.log('alice shared secret: ', alice_sharedSecret)
-  console.log('bob shared secret: ', bob_sharedSecret)
+  const alice_sharedSecretStr = base64.fromByteArray(alice_sharedSecret)
+  const bob_sharedSecretStr = base64.fromByteArray(bob_sharedSecret)
 
-  // ---------------------
+  console.log('alice shared secret: ', alice_sharedSecretStr)
+  console.log('bob shared secret: ', bob_sharedSecretStr)
+
   // encrypt/decrypt a message
-
-  console.log('------------------------------------')
-  console.log('get plain text and choose crypto lib')
-  console.log('------------------------------------')
+  console.log('--------------')
+  console.log('get plain text')
+  console.log('--------------')
 
   const plainMsg = "It was the best of times, it was the worst of times, it was the age of wisdom, it was the age of foolishness, it was the epoch of belief, it was the epoch of incredulity, it was the season of Light, it was the season of Darkness, it was the spring of hope, it was the winter of despair, we had everything before us, we had nothing before us, we were all going direct to Heaven, we were all going direct the other way – in short, the period was so far like the present period, that some of its noisiest authorities insisted on its being received, for good or for evil, in the superlative degree of comparison only."
-  const cryptolib = chooseCrypto()
 
-  console.log('cryptolib: ', cryptolib)
   console.log('alice\'s plain text message: \n', plainMsg)
 
   // Encrypt, and then decrypt, using browser's WebCrypto API
   encrypt({
     lib: cryptolib,
     msg: plainMsg,
-    key: alice_sharedSecret,
+    key: alice_sharedSecretStr,
     compressed: true,
     alg: 'aes-cbc-hmac'
   })
@@ -204,7 +218,7 @@ const fullTest = () => {
       return decrypt({
         lib: cryptolib,
         msg: encryptedObj.data,
-        key: bob_sharedSecret,
+        key: bob_sharedSecretStr,
         iv: encryptedObj.iv,
         mac: encryptedObj.mac,
         compressed: true,
@@ -216,6 +230,8 @@ const fullTest = () => {
     })
     .catch(err => console.log('something went wrong: ', err))
 }
+
+fullTest()
 
 module.exports = {
   hasWebCrypto,

@@ -217,8 +217,6 @@ const fullTest = () => {
     .catch(err => console.log('something went wrong: ', err))
 }
 
-fullTest()
-
 module.exports = {
   hasWebCrypto,
   hasNodeCrypto,

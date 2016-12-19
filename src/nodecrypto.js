@@ -2,7 +2,34 @@
 
 const crypto = require('crypto')
 const base64 = require('base64-js')
-const { verifyMac } = require('./helpers')
+
+const verifyMac = (data, key, mac, calculatedMac, length) => {
+  if (mac.byteLength !== length || calculatedMac.byteLength < length) {
+    throw new Error('Bad MAC length')
+  }
+
+  const a = new Uint8Array(calculatedMac)
+  const b = new Uint8Array(mac)
+  let result = 0
+
+  for (let i = 0; i < mac.byteLength; ++i) {
+    result = result | (a[i] ^ b[i])
+  }
+
+  if (result === 0) {
+    console.log('*message is authentic*')
+    console.log('calculated mac: ', base64.fromByteArray(a))
+    console.log('original mac: ', base64.fromByteArray(b))
+
+    return true
+  }
+
+  if (result !== 0) {
+    console.log('calculated mac: ', base64.fromByteArray(a))
+    console.log('original mac: ', base64.fromByteArray(b))
+    throw new Error('bad mac')
+  }
+}
 
 const getRandomBytes = size => {
   return crypto.randomBytes(size)

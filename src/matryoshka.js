@@ -5,7 +5,6 @@ const base64 = require('base64-js')
 const curve25519 = require('./curve25519')
 const webcrypto = require('./webcrypto')
 const nodecrypto = require('./nodecrypto')
-const sodiumcrypto = require('./sodium')
 
 // TODO: Don't use all these switches in each function at this level. Instead
 // wrap the switch in another level of abstraction from which there could be
@@ -229,8 +228,6 @@ const fullTest = () => {
     })
     .catch(err => console.log('something went wrong: ', err))
 }
-
-fullTest()
 
 module.exports = {
   hasWebCrypto,

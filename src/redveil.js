@@ -237,4 +237,4 @@ module.exports = Object.assign({}, curve25519, {
   chooseCrypto,
   encrypt,
   decrypt
-}
+})

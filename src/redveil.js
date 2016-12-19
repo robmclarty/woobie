@@ -145,6 +145,8 @@ const decrypt = ({
   }))
 }
 
+// -----------------------------
+
 const fullTest = () => {
   console.log('-----------------')
   console.log('choose crypto lib')
@@ -229,11 +231,10 @@ const fullTest = () => {
     .catch(err => console.log('something went wrong: ', err))
 }
 
-module.exports = {
+module.exports = Object.assign({}, curve25519, {
   hasWebCrypto,
   hasNodeCrypto,
   chooseCrypto,
   encrypt,
-  decrypt,
-  fullTest
+  decrypt
 }

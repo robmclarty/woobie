@@ -1,6 +1,6 @@
 {
   "name": "redveil",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A multi-layered encryption protocol for safely sending messages end-to-end.",
   "main": "dist/redveil.js",
   "scripts": {

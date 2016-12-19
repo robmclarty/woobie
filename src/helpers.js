@@ -65,18 +65,19 @@ const verifyMac = (data, key, mac, calculatedMac, length) => {
     throw new Error('Bad MAC length')
   }
 
-  const a = new Uint8Array(calculatedMac)
-  const b = new Uint8Array(mac)
-  let result = 0
+  const a = Uint8Array.from(calculatedMac)
+  const b = Uint8Array.from(mac)
 
-  for (let i = 0; i < mac.byteLength; ++i) {
-    result = result | (a[i] ^ b[i])
-  }
+  const result = a.reduce((r, el, i) => {
+    return r | (a[i] ^ b[i])
+  }, 0)
 
   if (result === 0) {
     console.log('*message is authentic*')
     console.log('calculated mac: ', base64.fromByteArray(a))
     console.log('original mac: ', base64.fromByteArray(b))
+
+    return true
   }
 
   if (result !== 0) {

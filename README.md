@@ -1,5 +1,4 @@
-# Matryoshka
+# Red Veil
 
-A multi-layered messaging encryption protocol inspired by Signal. It uses a
-triple ECDH/Sphincs key exchange, ratcheting, perfect forward secrecy, and wraps
-it all in NTRU.
+Wrap information in a veil of privacy and security. Red Veil is a javascript
+protocol for securing communication end-to-end.

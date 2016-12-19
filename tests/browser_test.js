@@ -1,5 +1,5 @@
 'use strict'
 
-import matryoshka from '../src/matryoshka.js'
+import redeveil from '../src/redveil.js'
 
-matryoshka.fullTest()
+redeveil.fullTest()

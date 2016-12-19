@@ -6,9 +6,9 @@ import replace from 'rollup-plugin-replace'
 import uglify from 'rollup-plugin-uglify'
 
 export default {
-  moduleName: 'matryoshka',
-  entry: 'src/matryoshka.js',
-  dest: 'build/matryoshka.js',
+  moduleName: 'redveil',
+  entry: 'src/redveil.js',
+  dest: 'build/redveil.js',
   format: 'iife',
   sourceMap: true,
   plugins: [

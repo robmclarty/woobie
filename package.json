@@ -1,15 +1,15 @@
 {
-  "name": "matryoshka",
-  "version": "0.0.1",
+  "name": "redveil",
+  "version": "0.0.2",
   "description": "A multi-layered encryption protocol for safely sending messages end-to-end.",
-  "main": "dist/matryoshka.js",
+  "main": "dist/redveil.js",
   "scripts": {
     "rollup": "./node_modules/.bin/rollup -c",
     "test": "tape tests/index.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/robmclarty/matryoshka.git"
+    "url": "git+https://github.com/robmclarty/redveil.git"
   },
   "engines": {
     "node": ">= 6.2.2"
@@ -28,9 +28,9 @@
   "author": "Rob McLarty",
   "license": "Unlicense",
   "bugs": {
-    "url": "https://github.com/robmclarty/matryoshka/issues"
+    "url": "https://github.com/robmclarty/redveil/issues"
   },
-  "homepage": "https://github.com/robmclarty/matryoshka#readme",
+  "homepage": "https://github.com/robmclarty/redveil#readme",
   "devDependencies": {
     "rollup": "0.37.0",
     "rollup-plugin-commonjs": "6.0.0",

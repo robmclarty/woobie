@@ -1,13 +1,13 @@
 'use strict'
 
 const test = require('tape')
-const matryoshka = require('../src/matryoshka')
+const redveil = require('../src/redveil')
 const crypto = require('crypto')
 
 test('sanity test', t => {
   t.plan(2)
-  t.equal(typeof matryoshka.sanity, 'function')
-  t.equal(matryoshka.sanity(), 'it worked!')
+  t.equal(typeof redveil.sanity, 'function')
+  t.equal(redveil.sanity(), 'it worked!')
 })
 
 test('dh', t => {
@@ -37,7 +37,7 @@ test('dh', t => {
 test('full test', t => {
   t.plan(1)
 
-  matryoshka.fullTest()
+  redveil.fullTest()
 
   t.equal(1, 1)
 })

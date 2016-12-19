@@ -236,5 +236,6 @@ module.exports = Object.assign({}, curve25519, {
   hasNodeCrypto,
   chooseCrypto,
   encrypt,
-  decrypt
+  decrypt,
+  generateRandomBytes
 })

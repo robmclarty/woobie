@@ -1,8 +1,8 @@
 {
   "name": "redveil",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "A multi-layered encryption protocol for safely sending messages end-to-end.",
-  "main": "dist/redveil.js",
+  "main": "src/redveil.js",
   "scripts": {
     "rollup": "./node_modules/.bin/rollup -c",
     "test": "tape tests/index.js"

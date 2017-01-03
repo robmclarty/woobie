@@ -24,7 +24,7 @@ const keyPair = seed => {
  * you can calculate on your end by using your secret key with my public key.
  *
  * @param {Uint8Array} secretKey - A secret key generated from scalar mult.
- * @param {Uint8Array} publicKey - A public key generated shared from another user.
+ * @param {Uint8Array} publicKey - A public key shared from another user.
  * @return {Uint8Array} A new shared secret derived from parameters using scalar mult.
  */
 const sharedSecret = (secretKey, publicKey) => {

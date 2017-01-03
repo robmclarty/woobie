@@ -12,9 +12,11 @@ const str2ab = str => {
   const buf = new ArrayBuffer(str.length * 2) // 2 bytes for each char
   const bufView = new Uint16Array(buf)
 
-  for (var i = 0, strLen = str.length; i < strLen; i++) {
-    bufView[i] = str.charCodeAt(i)
-  }
+  // for (var i = 0, strLen = str.length; i < strLen; i++) {
+  //   bufView[i] = str.charCodeAt(i)
+  // }
+
+  bufView.forEach((el, i) => bufView[i] = str.charCodeAt(i))
 
   return buf
 }
@@ -59,7 +61,10 @@ const decompress = compressedMsg => {
 const encodeBase64 = str => Buffer.from(encodeURIComponent(str)).toString('base64')
 const decodeBase64 = str => decodeURIComponent(Buffer.from(str, 'base64').toString('utf8'))
 
+// Compare two MACs to verify that they are identical.
 // All inputs are Uint8Array types except length, which is an integer.
+// TODO: Perhaps rewrite so that this function encapsulates the MAC calculation
+// based on the data + key.
 const verifyMac = (data, key, mac, calculatedMac, length) => {
   if (mac.byteLength !== length || calculatedMac.byteLength < length) {
     throw new Error('Bad MAC length')
@@ -74,16 +79,16 @@ const verifyMac = (data, key, mac, calculatedMac, length) => {
 
   if (result === 0) {
     console.log('*message is authentic*')
-    console.log('calculated mac: ', base64.fromByteArray(a))
-    console.log('original mac: ', base64.fromByteArray(b))
+    console.log('calculated MAC: ', base64.fromByteArray(a))
+    console.log('original MAC: ', base64.fromByteArray(b))
 
     return true
   }
 
   if (result !== 0) {
-    console.log('calculated mac: ', base64.fromByteArray(a))
-    console.log('original mac: ', base64.fromByteArray(b))
-    throw new Error('bad mac')
+    console.log('calculated MAC: ', base64.fromByteArray(a))
+    console.log('original MAC: ', base64.fromByteArray(b))
+    throw new Error('bad MAC')
   }
 }
 

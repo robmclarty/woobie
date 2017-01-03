@@ -15,18 +15,19 @@
     "node": ">= 6.2.2"
   },
   "keywords": [
-    "encryption",
-    "end-to-end",
-    "aes",
-    "ecdh",
-    "diffie hellman",
-    "webcrypto",
     "crypto",
-    "zero knowledge",
-    "curve25519"
+    "encryption",
+    "webcrypto",
+    "end-to-end",
+    "elliptic curve",
+    "diffie hellman",
+    "aes",
+    "curve25519",
+    "sha",
+    "hmac"
   ],
-  "author": "Rob McLarty",
-  "license": "Unlicense",
+  "author": "Rob McLarty <r@robmclarty.com> (http://robmclarty.com)",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/robmclarty/redveil/issues"
   },

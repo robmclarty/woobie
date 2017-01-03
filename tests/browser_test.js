@@ -22,8 +22,8 @@ const aliceKeys = woobie.keyPair(woobie.generateRandomBytes({
   lib: cryptolib,
   size: 32
 }))
-const alice_secretKeyStr = woobie.base64fromBytes(aliceKeys.secretKey)
-const alice_publicKeyStr = woobie.base64fromBytes(aliceKeys.publicKey)
+const alice_secretKeyStr = woobie.base64FromBytes(aliceKeys.secretKey)
+const alice_publicKeyStr = woobie.base64FromBytes(aliceKeys.publicKey)
 
 console.log('alice secret: ', alice_secretKeyStr)
 console.log('alice pub: ', alice_publicKeyStr)
@@ -33,8 +33,8 @@ const bobKeys = woobie.keyPair(woobie.generateRandomBytes({
   lib: cryptolib,
   size: 32
 }))
-const bob_secretKeyStr = woobie.base64fromBytes(bobKeys.secretKey)
-const bob_publicKeyStr = woobie.base64fromBytes(bobKeys.publicKey)
+const bob_secretKeyStr = woobie.base64FromBytes(bobKeys.secretKey)
+const bob_publicKeyStr = woobie.base64FromBytes(bobKeys.publicKey)
 
 console.log('bob secret: ', bob_secretKeyStr)
 console.log('bob pub: ', bob_publicKeyStr)
@@ -43,8 +43,8 @@ console.log('bob pub: ', bob_publicKeyStr)
 const alice_sharedSecret = woobie.sharedSecret(aliceKeys.secretKey, bobKeys.publicKey)
 const bob_sharedSecret = woobie.sharedSecret(bobKeys.secretKey, aliceKeys.publicKey)
 
-const alice_sharedSecretStr = woobie.base64fromBytes(alice_sharedSecret)
-const bob_sharedSecretStr = woobie.base64fromBytes(bob_sharedSecret)
+const alice_sharedSecretStr = woobie.base64FromBytes(alice_sharedSecret)
+const bob_sharedSecretStr = woobie.base64FromBytes(bob_sharedSecret)
 
 console.log('alice shared secret: ', alice_sharedSecretStr)
 console.log('bob shared secret: ', bob_sharedSecretStr)

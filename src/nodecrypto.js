@@ -1,8 +1,7 @@
 'use strict'
 
-const crypto = require('crypto')
-const base64 = require('base64-js')
-const verifyMac = require('./helpers.js').verifyMac
+const helpers = require('./helpers')
+const crypto = helpers.hasNodeCrypto() ? require('crypto') : null
 
 const getRandomBytes = size => {
   return crypto.randomBytes(size)
@@ -17,7 +16,7 @@ const sign = (data, key) => new Promise((resolve, reject) => {
 
 const verify = (data, key, mac, length) => {
   return sign(data, key)
-    .then(calculatedMac => verifyMac(data, key, mac, calculatedMac, length))
+    .then(calculatedMac => helpers.verifyMac(data, key, mac, calculatedMac, length))
 }
 
 const hash = data => new Promise((resolve, reject) => {
@@ -37,8 +36,8 @@ const encrypt_AES_GCM = (data, key) => new Promise((resolve, reject) => {
 
   const iv = getRandomBytes(16)
 
-  console.log('iv: ', base64.fromByteArray(iv))
-  console.log('key: ', base64.fromByteArray(key))
+  console.log('iv: ', helpers.base64FromBytes(iv))
+  console.log('key: ', helpers.base64FromBytes(key))
 
   const encryptor = crypto.createCipheriv('aes-256-gcm', key, iv)
   let encryptedData = encryptor.update(data, 'utf8')
@@ -67,9 +66,9 @@ const decrypt_AES_GCM = (data, key, iv, mac) => new Promise((resolve, reject) =>
   console.log('decrypting with node crypto AES-GCM...')
   console.log('--------------------------------------')
 
-  console.log('key: ', base64.fromByteArray(key))
-  console.log('iv: ', base64.fromByteArray(iv))
-  console.log('mac: ', base64.fromByteArray(mac))
+  console.log('key: ', helpers.base64FromBytes(key))
+  console.log('iv: ', helpers.base64FromBytes(iv))
+  console.log('mac: ', helpers.base64FromBytes(mac))
 
   const decryptor = crypto.createDecipheriv('aes-256-gcm', key, iv)
   decryptor.setAuthTag(mac)
@@ -89,8 +88,8 @@ const encrypt_AES_CBC_HMAC = (data, key) => new Promise((resolve, reject) => {
 
   const iv = getRandomBytes(16)
 
-  console.log('iv: ', base64.fromByteArray(iv))
-  console.log('key: ', base64.fromByteArray(key))
+  console.log('iv: ', helpers.base64FromBytes(iv))
+  console.log('key: ', helpers.base64FromBytes(key))
 
   const encryptor = crypto.createCipheriv('aes-256-cbc', key, iv)
   let encryptedData = encryptor.update(data, 'utf8')
@@ -110,9 +109,9 @@ const decrypt_AES_CBC_HMAC = (data, key, iv, mac) => new Promise((resolve, rejec
   console.log('decrypting with node crypto AES-CBC-HMAC...')
   console.log('-------------------------------------------')
 
-  console.log('key: ', base64.fromByteArray(key))
-  console.log('iv: ', base64.fromByteArray(iv))
-  console.log('mac: ', base64.fromByteArray(mac))
+  console.log('key: ', helpers.base64FromBytes(key))
+  console.log('iv: ', helpers.base64FromBytes(iv))
+  console.log('mac: ', helpers.base64FromBytes(mac))
 
   return verify(data, key, mac, mac.byteLength)
     .then(() => {

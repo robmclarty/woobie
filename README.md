@@ -26,6 +26,18 @@ strings with zlib.
 - Base64 conversions are done using [base64-js](https://github.com/beatgammit/base64-js).
 - Zlib (de)compression is done using [pako](https://github.com/nodeca/pako).
 
+## Why AES-256-GCM/CBC-HMAC(SHA-256) and not something newer like salsa20 or
+chacha20 with poly1305 authentication (especially since you're already using
+Tweetnacl)?**
+
+Well, AES and SHA (as well as curve25519) are pretty well tested and validated
+to be pretty darned secure, plus they already have some hardware optimizations
+which can be taken advantage of when they are available which will make your
+apps more responsive.
+
+I do want to also include Tweetnacl's salsa20poly1305 implementation as an
+option, but I'll be coming back to that later after I've got the basics covered.
+
 
 ## WTF is a Woobie?
 

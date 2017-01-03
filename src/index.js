@@ -15,41 +15,17 @@ const CRYPTO_LIBS = {
   NODE: 'node'
 }
 
-const algorithm = 'aes-256-gcm'
-const dhBitDepth = 2048
-const rsaBitDepth = 4096
-const aesBitDepth = 256
-const keySize = 32
-
-// feature detection
-// -----------------
-const hasWebCrypto = () => {
-  return typeof window !== 'undefined' &&
-    window.crypto &&
-    window.crypto.subtle &&
-    typeof window.crypto.getRandomValues === 'function'
-}
-
-// TODO: do this better without including the full node lib here.
-const hasNodeCrypto = () => {
-  const crypto = require('crypto')
-
-  if (typeof crypto.getCiphers !== 'function') return false
-
-  const ciphers = crypto.getCiphers()
-
-  return ciphers && (
-    ciphers.includes(algorithm) ||
-    ciphers.includes('aes-256-gcm') ||
-    ciphers.includes('aes-256-cbc')
-  )
-}
+// const algorithm = 'aes-256-gcm'
+// const dhBitDepth = 2048
+// const rsaBitDepth = 4096
+// const aesBitDepth = 256
+// const keySize = 32
 
 // Return the best available crypto lib based on feature detection in order
-// 1) webcrypto, 2) node crypto, 3) libsodium.
+// 1) webcrypto, 2) node crypto, 3) tweetnacl (chacha20poly1305).
 const chooseCrypto = () => {
-  if (hasWebCrypto()) return CRYPTO_LIBS.WEBCRYPTO
-  if (!hasWebCrypto() && hasNodeCrypto()) return CRYPTO_LIBS.NODE
+  if (helpers.hasWebCrypto()) return CRYPTO_LIBS.WEBCRYPTO
+  if (!helpers.hasWebCrypto() && helpers.hasNodeCrypto()) return CRYPTO_LIBS.NODE
 
   return CRYPTO_LIBS.WEBCRYPTO
 }
@@ -147,8 +123,6 @@ const decrypt = ({
 // Combine functions from curve25519 + helpers and export all together with this
 // file's functions.
 module.exports = Object.assign({}, helpers, curve25519, {
-  hasWebCrypto,
-  hasNodeCrypto,
   chooseCrypto,
   encrypt,
   decrypt,

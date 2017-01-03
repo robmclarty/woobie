@@ -3,6 +3,33 @@
 const pako = require('pako')
 const base64 = require('base64-js')
 
+// detection
+// ---------
+
+const hasWebCrypto = () => {
+  return typeof window !== 'undefined' &&
+    window.crypto &&
+    window.crypto.subtle &&
+    typeof window.crypto.getRandomValues === 'function'
+}
+
+// TODO: do this better without including the full node lib here.
+const hasNodeCrypto = () => {
+  const crypto = require('crypto')
+
+  if (typeof crypto.getCiphers !== 'function') return false
+
+  const ciphers = crypto.getCiphers()
+
+  return ciphers && (
+    ciphers.includes('aes-256-gcm') ||
+    ciphers.includes('aes-256-cbc')
+  )
+}
+
+// conversion
+// ----------
+
 // Take a Uint8Array and return a base64-encoded string representation of it.
 const base64FromBytes = byteArray => {
   return base64.fromByteArray(byteArray)
@@ -84,6 +111,8 @@ const verifyMac = (data, key, mac, calculatedMac, length) => {
 }
 
 module.exports = {
+  hasWebCrypto,
+  hasNodeCrypto,
   base64ToBytes,
   base64FromBytes,
   hexToBytes,

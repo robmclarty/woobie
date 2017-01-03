@@ -1,17 +1,7 @@
 'use strict'
 
-const verifyMac = require('./helpers.js').verifyMac
-
-const hasWebCrypto = () => {
-  return typeof window !== 'undefined' &&
-    window.crypto &&
-    window.crypto.subtle &&
-    typeof window.crypto.getRandomValues === 'function'
-}
-
-//const crypto = typeof window === 'function' ? window.crypto : null
-const crypto = hasWebCrypto() ? window.crypto : null
-const base64 = require('base64-js')
+const helpers = require('./helpers')
+const crypto = helpers.hasWebCrypto() ? window.crypto : null
 
 const getRandomBytes = size => {
   return crypto.getRandomValues(new Uint8Array(size))
@@ -40,7 +30,7 @@ const sign = (data, key) => {
 
 const verify = (data, key, mac, length) => {
   return sign(data, key)
-    .then(calculatedMac => verifyMac(data, key, mac, calculatedMac, length))
+    .then(calculatedMac => helpers.verifyMac(data, key, mac, calculatedMac, length))
 }
 
 const hash = data => {
@@ -54,8 +44,8 @@ const encrypt_AES_GCM = (data, key) => {
 
   const iv = getRandomBytes(16)
 
-  console.log('iv: ', base64.fromByteArray(iv))
-  console.log('key: ', base64.fromByteArray(key))
+  console.log('iv: ', helpers.base64FromBytes(iv))
+  console.log('key: ', helpers.base64FromBytes(key))
 
   return crypto.subtle.importKey('raw', key, { name: 'AES-GCM', length: 256 }, false, ['encrypt'])
     .then(importedKey => crypto.subtle.encrypt({ name: 'AES-GCM', iv, tagLength: 128 }, importedKey, data))
@@ -71,8 +61,8 @@ const decrypt_AES_GCM = (data, key, iv, mac) => {
   console.log('decrypting with web crypto AES-GCM...')
   console.log('-------------------------------------')
 
-  console.log('iv: ', base64.fromByteArray(iv))
-  console.log('key: ', base64.fromByteArray(key))
+  console.log('iv: ', helpers.base64FromBytes(iv))
+  console.log('key: ', helpers.base64FromBytes(key))
 
   return crypto.subtle.importKey('raw', key, { name: 'AES-GCM' }, false, ['decrypt'])
     .then(importedKey => crypto.subtle.decrypt({ name: 'AES-GCM', iv, tagLength: 128 }, importedKey, data))
@@ -90,8 +80,8 @@ const encrypt_AES_CBC_HMAC = (data, key) => {
   const iv = getRandomBytes(16)
   let encryptedData = []
 
-  console.log('iv: ', base64.fromByteArray(iv))
-  console.log('key: ', base64.fromByteArray(key))
+  console.log('iv: ', helpers.base64FromBytes(iv))
+  console.log('key: ', helpers.base64FromBytes(key))
 
   return crypto.subtle.importKey('raw', key, { name: 'AES-CBC' }, false, ['encrypt'])
     .then(importedKey => crypto.subtle.encrypt({ name: 'AES-CBC', iv }, importedKey, data))
@@ -113,9 +103,9 @@ const decrypt_AES_CBC_HMAC = (data, key, iv, mac) => {
   console.log('decrypting with web crypto AES-CBC-HMAC...')
   console.log('------------------------------------------')
 
-  console.log('iv: ', base64.fromByteArray(iv))
-  console.log('key: ', base64.fromByteArray(key))
-  console.log('mac: ', base64.fromByteArray(mac))
+  console.log('iv: ', helpers.base64FromBytes(iv))
+  console.log('key: ', helpers.base64FromBytes(key))
+  console.log('mac: ', helpers.base64FromBytes(mac))
 
   return verify(data, key, mac, mac.byteLength)
     .then(() => crypto.subtle.importKey('raw', key, { name: 'AES-CBC' }, false, ['decrypt']))

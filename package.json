@@ -2,7 +2,7 @@
   "name": "woobie",
   "version": "0.0.6",
   "description": "A multi-layered encryption protocol for wrapping your messages in end-to-end security.",
-  "main": "src/woobie.js",
+  "main": "src/index.js",
   "scripts": {
     "rollup": "./node_modules/.bin/rollup -c",
     "test": "tape tests/index.js"

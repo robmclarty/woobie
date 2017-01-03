@@ -1,8 +1,7 @@
 'use strict'
 
 const test = require('tape')
-const base64 = require('base64-js')
-const redveil = require('../src/redveil')
+const woobie = require('../src/index.js')
 
 test('full test', t => {
   t.plan(1)
@@ -11,10 +10,10 @@ test('full test', t => {
   console.log('choose crypto lib')
   console.log('-----------------')
 
-  const cryptolib = redveil.chooseCrypto()
+  const cryptolib = woobie.chooseCrypto()
 
-  console.log('webcrypto: ', redveil.hasWebCrypto())
-  console.log('nodecrypto: ', redveil.hasNodeCrypto())
+  console.log('webcrypto: ', woobie.hasWebCrypto())
+  console.log('nodecrypto: ', woobie.hasNodeCrypto())
   console.log('chosen cryptolib: ', cryptolib)
 
   // generate keys
@@ -23,33 +22,33 @@ test('full test', t => {
   console.log('---------------------------')
 
   // Create pub/priv keys for alice
-  const aliceKeys = redveil.keyPair(redveil.generateRandomBytes({
+  const aliceKeys = woobie.keyPair(woobie.generateRandomBytes({
     lib: cryptolib,
     size: 32
   }))
-  const alice_secretKeyStr = base64.fromByteArray(aliceKeys.secretKey)
-  const alice_publicKeyStr = base64.fromByteArray(aliceKeys.publicKey)
+  const alice_secretKeyStr = woobie.base64fromBytes(aliceKeys.secretKey)
+  const alice_publicKeyStr = woobie.base64fromBytes(aliceKeys.publicKey)
 
   console.log('alice secret: ', alice_secretKeyStr)
   console.log('alice pub: ', alice_publicKeyStr)
 
   // Create pub/priv keys for bob
-  const bobKeys = redveil.keyPair(redveil.generateRandomBytes({
+  const bobKeys = woobie.keyPair(woobie.generateRandomBytes({
     lib: cryptolib,
     size: 32
   }))
-  const bob_secretKeyStr = base64.fromByteArray(bobKeys.secretKey)
-  const bob_publicKeyStr = base64.fromByteArray(bobKeys.publicKey)
+  const bob_secretKeyStr = woobie.base64fromBytes(bobKeys.secretKey)
+  const bob_publicKeyStr = woobie.base64fromBytes(bobKeys.publicKey)
 
   console.log('bob secret: ', bob_secretKeyStr)
   console.log('bob pub: ', bob_publicKeyStr)
 
   // Using new buffers for public keys create shared secret from them.
-  const alice_sharedSecret = redveil.sharedSecret(aliceKeys.secretKey, bobKeys.publicKey)
-  const bob_sharedSecret = redveil.sharedSecret(bobKeys.secretKey, aliceKeys.publicKey)
+  const alice_sharedSecret = woobie.sharedSecret(aliceKeys.secretKey, bobKeys.publicKey)
+  const bob_sharedSecret = woobie.sharedSecret(bobKeys.secretKey, aliceKeys.publicKey)
 
-  const alice_sharedSecretStr = base64.fromByteArray(alice_sharedSecret)
-  const bob_sharedSecretStr = base64.fromByteArray(bob_sharedSecret)
+  const alice_sharedSecretStr = woobie.base64fromBytes(alice_sharedSecret)
+  const bob_sharedSecretStr = woobie.base64fromBytes(bob_sharedSecret)
 
   console.log('alice shared secret: ', alice_sharedSecretStr)
   console.log('bob shared secret: ', bob_sharedSecretStr)
@@ -64,7 +63,7 @@ test('full test', t => {
   console.log('alice\'s plain text message: \n', plainMsg)
 
   // Encrypt, and then decrypt, using browser's WebCrypto API
-  redveil.encrypt({
+  woobie.encrypt({
     lib: cryptolib,
     msg: plainMsg,
     key: alice_sharedSecretStr,
@@ -74,7 +73,7 @@ test('full test', t => {
     .then(encryptedObj => {
       console.log('encrypted message: \n', encryptedObj.data)
 
-      return redveil.decrypt({
+      return woobie.decrypt({
         lib: cryptolib,
         msg: encryptedObj.data,
         key: bob_sharedSecretStr,

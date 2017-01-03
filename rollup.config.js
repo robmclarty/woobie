@@ -6,9 +6,9 @@ import replace from 'rollup-plugin-replace'
 import uglify from 'rollup-plugin-uglify'
 
 export default {
-  moduleName: 'redveil',
-  entry: 'src/redveil.js',
-  dest: 'build/redveil.js',
+  moduleName: 'woobie',
+  entry: 'src/index.js',
+  dest: 'build/woobie.js',
   format: 'iife',
   sourceMap: true,
   plugins: [

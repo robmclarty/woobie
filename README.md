@@ -26,7 +26,7 @@ strings with zlib.
 - Base64 conversions are done using [base64-js](https://github.com/beatgammit/base64-js).
 - Zlib (de)compression is done using [pako](https://github.com/nodeca/pako).
 
-## Why AES and not something newer like salsa/chacha20 with poly1305 authentication?
+## Why AES and not something newer like salsa/chacha20 with poly1305 auth?
 
 Well, AES-256 and SHA-256 (as well as curve25519) are pretty well tested and
 validated to be pretty darned secure, plus they already have some hardware
@@ -41,7 +41,7 @@ option, but I'll be coming back to that later after I've got the basics covered.
 
 In the [1983 Micheal Keaton movie "Mr. Mom"](http://www.imdb.com/title/tt0085970/),
 the youngest child affectionately called his security blanket a "woobie". This
-stuck in my head when trying to think up a name than encapsulated the idea of
+stuck in my head when trying to think up a name that encapsulated the idea of
 "wrap a message in security" as a description of an end-to-end encryption
 protocol. Also, nobody else was using it.
 
@@ -60,3 +60,7 @@ could then open the message (decrypt it). Ideally I'd like to simply execute
 this module handle all the details required for that. Not sure what that looks
 like yet, but would like to handle crypto protocol logic here, and keep it all
 out of the application that's using this.
+
+Once basic crypto is working, I'd like to wrap it all in an extra layer of
+post-quantum crypto using lattice algorithms to further bolster the cipher-text
+against future (or maybe existing!) quantum computers.

@@ -1,7 +1,6 @@
 'use strict'
 
-const pako = require('pako')
-const base64 = require('base64-js')
+const helpers = require('./helpers')
 const curve25519 = require('./curve25519')
 const webcrypto = require('./webcrypto')
 const nodecrypto = require('./nodecrypto')
@@ -82,9 +81,9 @@ const encrypt = ({
   alg = 'aes-cbc-hmac'
 }) => {
   const msgAsBytes = compressed ?
-    pako.deflate(msg) :
+    helpers.compress(msg) :
     Buffer.from(msg, 'utf8')
-  const keyAsBytes = base64.toByteArray(key)
+  const keyAsBytes = helpers.base64ToBytes(key)
   let encryptedPromise = {}
 
   switch (lib) {
@@ -101,9 +100,9 @@ const encrypt = ({
   }
 
   return encryptedPromise.then(encryptedData => ({
-    data: base64.fromByteArray(encryptedData.data),
-    iv: base64.fromByteArray(encryptedData.iv),
-    mac: !encryptedData.mac ? '' : base64.fromByteArray(encryptedData.mac)
+    data: helpers.base64FromBytes(encryptedData.data),
+    iv: helpers.base64FromBytes(encryptedData.iv),
+    mac: !encryptedData.mac ? '' : helpers.base64FromBytes(encryptedData.mac)
   }))
 }
 
@@ -119,10 +118,10 @@ const decrypt = ({
   compressed = true,
   alg = 'aes-cbc-hmac'
 }) => {
-  const msgAsBytes = base64.toByteArray(msg)
-  const keyAsBytes = base64.toByteArray(key)
-  const ivAsBytes = base64.toByteArray(iv)
-  const macAsBytes = base64.toByteArray(mac)
+  const msgAsBytes = helpers.base64ToBytes(msg)
+  const keyAsBytes = helpers.base64ToBytes(key)
+  const ivAsBytes = helpers.base64ToBytes(iv)
+  const macAsBytes = helpers.base64ToBytes(mac)
   let decryptedPromise = {}
 
   switch (lib) {
@@ -140,13 +139,14 @@ const decrypt = ({
 
   return decryptedPromise.then(decryptedData => ({
     data: compressed ?
-      pako.inflate(decryptedData.data, { to: 'string' }) :
+      helpers.decompress(decryptedData.data) :
       decryptedData.data.toString('utf8')
   }))
 }
 
-// Combine functions from curve25519 and export all together with this file's functions.
-module.exports = Object.assign({}, curve25519, {
+// Combine functions from curve25519 + helpers and export all together with this
+// file's functions.
+module.exports = Object.assign({}, helpers, curve25519, {
   hasWebCrypto,
   hasNodeCrypto,
   chooseCrypto,

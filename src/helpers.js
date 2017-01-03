@@ -1,30 +1,22 @@
 'use strict'
 
+const pako = require('pako')
 const base64 = require('base64-js')
 
-// array buffer <-> string (from https://developers.google.com/web/updates/2012/06/How-to-convert-ArrayBuffer-to-and-from-String)
-// -----------------------
-const ab2str = buf => {
-  return String.fromCharCode.apply(null, new Uint16Array(buf))
+// Take a Uint8Array and return a base64-encoded string representation of it.
+const base64FromBytes = byteArray => {
+  return base64.fromByteArray(byteArray)
 }
 
-const str2ab = str => {
-  const buf = new ArrayBuffer(str.length * 2) // 2 bytes for each char
-  const bufView = new Uint16Array(buf)
-
-  // for (var i = 0, strLen = str.length; i < strLen; i++) {
-  //   bufView[i] = str.charCodeAt(i)
-  // }
-
-  bufView.forEach((el, i) => bufView[i] = str.charCodeAt(i))
-
-  return buf
+// Take a base64-encoded string and return a Uint8Array representation of it.
+const base64ToBytes = base64String => {
+  return base64.toByteArray(base64String)
 }
 
-// hex to byte array
-const byteArray2Hex = byteArray => {
+// Take a Uint8Array and return a hex-encoded string representation of it.
+const hexFromBytes = byteArray => {
   return byteArray.map((byte, i) => {
-    const nextHexByte = byteArray[i].toString(16) // integer to base 16
+    const nextHexByte = byteArray[i].toString(8) // integer to base 16
 
     if (nextHexByte.length < 2) return "0" + nextHexByte
 
@@ -32,7 +24,8 @@ const byteArray2Hex = byteArray => {
   }).join('')
 }
 
-const hex2ByteArray = hexString => {
+// Take a hex-encoded string and return a Uint8Array representation of it.
+const hexToBytes = hexString => {
   if (hexString.length % 2 !== 0) throw 'Must have an even number of hex digits to convert to bytes'
 
   return Uint8Array.from(hexString.split(/.{1,2}/g).map((char, i) => {
@@ -43,17 +36,15 @@ const hex2ByteArray = hexString => {
 // compression
 // -----------
 
-// Take a string and output a buffer who's content is a compressed version of string.
-// TODO: return a byte array instead of a string that can simply be passed
-// directly into the encryption function.
+// Take a string and output a Uint8Array who's content is a compressed version
+// of the string.
 const compress = plainStr => {
-  console.log('compressed msg: ', pako.deflate(plainStr, { to: 'string' }))
   return pako.deflate(plainStr)
 }
 
-// Take a buffer and output a string who's contents are decompressed from buffer.
+// Take a Uint8Array and output a string who's contents are decompressed from
+// the Uint8Array.
 const decompress = compressedMsg => {
-  console.log('compressed msg: ', compressedMsg)
   return pako.inflate(compressedMsg, { to: 'string' })
 }
 
@@ -79,22 +70,24 @@ const verifyMac = (data, key, mac, calculatedMac, length) => {
 
   if (result === 0) {
     console.log('*message is authentic*')
-    console.log('calculated MAC: ', base64.fromByteArray(a))
-    console.log('original MAC: ', base64.fromByteArray(b))
+    console.log('calculated MAC: ', base64FromBytes(a))
+    console.log('original MAC: ', base64FromBytes(b))
 
     return true
   }
 
   if (result !== 0) {
-    console.log('calculated MAC: ', base64.fromByteArray(a))
-    console.log('original MAC: ', base64.fromByteArray(b))
+    console.log('calculated MAC: ', base64FromBytes(a))
+    console.log('original MAC: ', base64FromBytes(b))
     throw new Error('bad MAC')
   }
 }
 
 module.exports = {
-  str2ab,
-  ab2str,
+  base64ToBytes,
+  base64FromBytes,
+  hexToBytes,
+  hexFromBytes,
   compress,
   decompress,
   encodeBase64,

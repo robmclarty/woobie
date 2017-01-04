@@ -93,7 +93,7 @@ const fullTest = (t, alg, cryptolib) => {
     .then(decryptedObj => {
       console.log('key: ', bob_sharedSecretStr)
       console.log('bob\'s decrypted message: \n', decryptedObj.data)
-      t.equal(decryptedObj.data, plainMsg)
+      t.equal(decryptedObj.data, plainMsg, 'decrypted message should equal original message')
     })
     .catch(err => console.log('something went wrong: ', err))
 }
@@ -141,7 +141,12 @@ test('node::aes-cbc-hmac::bad-mac', t => {
       })
     })
     .then(decryptedObj => t.notOk(decryptedObj.data))
-    .catch(err => t.ok(err.toString().includes('bad MAC')))
+    .catch(err => {
+      t.ok(
+        err.toString().includes('bad MAC'),
+        'should throw error if invalid MAC'
+      )
+    })
 })
 
 test('node::aes-gcm::bad-mac', t => {
@@ -175,7 +180,12 @@ test('node::aes-gcm::bad-mac', t => {
       })
     })
     .then(decryptedObj => t.notOk(decryptedObj.data))
-    .catch(err => t.ok(err.toString().includes('Unsupported state or unable to authenticate data')))
+    .catch(err => {
+      t.ok(
+        err.toString().includes('Unsupported state or unable to authenticate data'),
+        'should throw error if invalid MAC'
+      )
+    })
 })
 
 test('node::aes-cbc-hmac::message-tampered', t => {
@@ -210,7 +220,9 @@ test('node::aes-cbc-hmac::message-tampered', t => {
       })
     })
     .then(decryptedObj => t.notOk(decryptedObj.data))
-    .catch(err => t.ok(err.toString().includes('bad MAC')))
+    .catch(err => {
+      t.ok(err.toString().includes('bad MAC'), 'should throw error if cipher-text is tamprered')
+    })
 })
 
 test('node::aes-gcm::message-tampered', t => {
@@ -245,5 +257,162 @@ test('node::aes-gcm::message-tampered', t => {
       })
     })
     .then(decryptedObj => t.notOk(decryptedObj.data))
-    .catch(err => t.ok(err.toString().includes('Unsupported state or unable to authenticate data')))
+    .catch(err => {
+      t.ok(
+        err.toString().includes('Unsupported state or unable to authenticate data'),
+        'should throw error if cipher-text is tamprered'
+      )
+    })
+})
+
+test('node::aes-gcm::invalid-shared-secret-decrypt', t => {
+  t.plan(1)
+
+  const cryptolib = woobie.CRYPTO_LIBS.NODE
+  const alg = 'aes-gcm'
+  const aliceKeys = woobie.keyPair(woobie.generateRandomBytes({ lib: cryptolib, size: 32 }))
+  const bobKeys = woobie.keyPair(woobie.generateRandomBytes({ lib: cryptolib, size: 32 }))
+  const alice_sharedSecret = woobie.sharedSecret(aliceKeys.secretKey, bobKeys.publicKey)
+  const bob_sharedSecret = woobie.sharedSecret(bobKeys.secretKey, aliceKeys.publicKey)
+  const invalid_bob_sharedSecret = woobie.generateRandomBytes({ lib: cryptolib, size: 32 })
+
+  woobie.encrypt({
+    lib: cryptolib,
+    data: plainMsg,
+    key: woobie.base64FromBytes(alice_sharedSecret),
+    compressed: true,
+    alg
+  })
+    .then(encryptedObj => {
+      return woobie.decrypt({
+        lib: cryptolib,
+        data: encryptedObj.data,
+        key: woobie.base64FromBytes(invalid_bob_sharedSecret),
+        iv: encryptedObj.iv,
+        mac: encryptedObj.mac,
+        compressed: true,
+        alg
+      })
+    })
+    .then(decryptedObj => t.notOk(decryptedObj.data))
+    .catch(err => {
+      t.ok(
+        err.toString().includes('Unsupported state or unable to authenticate data'),
+        'should throw error if invalid shared secret when decrypting'
+      )
+    })
+})
+
+test('node::aes-gcm::invalid-shared-secret-encrypt', t => {
+  t.plan(1)
+
+  const cryptolib = woobie.CRYPTO_LIBS.NODE
+  const alg = 'aes-gcm'
+  const aliceKeys = woobie.keyPair(woobie.generateRandomBytes({ lib: cryptolib, size: 32 }))
+  const bobKeys = woobie.keyPair(woobie.generateRandomBytes({ lib: cryptolib, size: 32 }))
+  const alice_sharedSecret = woobie.sharedSecret(aliceKeys.secretKey, bobKeys.publicKey)
+  const bob_sharedSecret = woobie.sharedSecret(bobKeys.secretKey, aliceKeys.publicKey)
+  const invalid_alice_sharedSecret = woobie.generateRandomBytes({ lib: cryptolib, size: 32 })
+
+  woobie.encrypt({
+    lib: cryptolib,
+    data: plainMsg,
+    key: woobie.base64FromBytes(invalid_alice_sharedSecret),
+    compressed: true,
+    alg
+  })
+    .then(encryptedObj => {
+      return woobie.decrypt({
+        lib: cryptolib,
+        data: encryptedObj.data,
+        key: woobie.base64FromBytes(bob_sharedSecret),
+        iv: encryptedObj.iv,
+        mac: encryptedObj.mac,
+        compressed: true,
+        alg
+      })
+    })
+    .then(decryptedObj => t.notOk(decryptedObj.data))
+    .catch(err => {
+      t.ok(
+        err.toString().includes('Unsupported state or unable to authenticate data'),
+        'should throw error if invalid shared secret when encrypting'
+      )
+    })
+})
+
+test('node::aes-cbc-hmac::invalid-shared-secret-decrypt', t => {
+  t.plan(1)
+
+  const cryptolib = woobie.CRYPTO_LIBS.NODE
+  const alg = 'aes-cbc-hmac'
+  const aliceKeys = woobie.keyPair(woobie.generateRandomBytes({ lib: cryptolib, size: 32 }))
+  const bobKeys = woobie.keyPair(woobie.generateRandomBytes({ lib: cryptolib, size: 32 }))
+  const alice_sharedSecret = woobie.sharedSecret(aliceKeys.secretKey, bobKeys.publicKey)
+  const bob_sharedSecret = woobie.sharedSecret(bobKeys.secretKey, aliceKeys.publicKey)
+  const invalid_bob_sharedSecret = woobie.generateRandomBytes({ lib: cryptolib, size: 32 })
+
+  woobie.encrypt({
+    lib: cryptolib,
+    data: plainMsg,
+    key: woobie.base64FromBytes(alice_sharedSecret),
+    compressed: true,
+    alg
+  })
+    .then(encryptedObj => {
+      return woobie.decrypt({
+        lib: cryptolib,
+        data: encryptedObj.data,
+        key: woobie.base64FromBytes(invalid_bob_sharedSecret),
+        iv: encryptedObj.iv,
+        mac: encryptedObj.mac,
+        compressed: true,
+        alg
+      })
+    })
+    .then(decryptedObj => t.notOk(decryptedObj.data))
+    .catch(err => {
+      t.ok(
+        err.toString().includes('bad MAC'),
+        'should throw error if invalid shared secret when decrypting'
+      )
+    })
+})
+
+test('node::aes-cbc-hmac::invalid-shared-secret-encrypt', t => {
+  t.plan(1)
+
+  const cryptolib = woobie.CRYPTO_LIBS.NODE
+  const alg = 'aes-cbc-hmac'
+  const aliceKeys = woobie.keyPair(woobie.generateRandomBytes({ lib: cryptolib, size: 32 }))
+  const bobKeys = woobie.keyPair(woobie.generateRandomBytes({ lib: cryptolib, size: 32 }))
+  const alice_sharedSecret = woobie.sharedSecret(aliceKeys.secretKey, bobKeys.publicKey)
+  const bob_sharedSecret = woobie.sharedSecret(bobKeys.secretKey, aliceKeys.publicKey)
+  const invalid_alice_sharedSecret = woobie.generateRandomBytes({ lib: cryptolib, size: 32 })
+
+  woobie.encrypt({
+    lib: cryptolib,
+    data: plainMsg,
+    key: woobie.base64FromBytes(invalid_alice_sharedSecret),
+    compressed: true,
+    alg
+  })
+    .then(encryptedObj => {
+      return woobie.decrypt({
+        lib: cryptolib,
+        data: encryptedObj.data,
+        key: woobie.base64FromBytes(bob_sharedSecret),
+        iv: encryptedObj.iv,
+        mac: encryptedObj.mac,
+        compressed: true,
+        alg
+      })
+    })
+    .then(decryptedObj => t.notOk(decryptedObj.data))
+    .catch(err => {
+      t.ok(
+        err.toString().includes('bad MAC'),
+        'should throw error if invalid shared secret when encrypting'
+      )
+    })
 })

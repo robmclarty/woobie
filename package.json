@@ -4,8 +4,8 @@
   "description": "A multi-layered encryption protocol for wrapping your messages in end-to-end security.",
   "main": "src/index.js",
   "scripts": {
-    "rollup": "./node_modules/.bin/rollup -c",
-    "test": "tape tests/index.js"
+    "rollup": "node_modules/.bin/rollup -c",
+    "test": "tape tests/index.js | node_modules/.bin/tap-spec"
   },
   "repository": {
     "type": "git",
@@ -38,6 +38,7 @@
     "rollup-plugin-node-resolve": "2.0.0",
     "rollup-plugin-replace": "1.1.1",
     "rollup-plugin-uglify": "1.0.1",
+    "tap-spec": "4.1.1",
     "tape": "4.6.3",
     "uglify-js": "git://github.com/mishoo/UglifyJS2.git#harmony"
   },

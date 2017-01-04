@@ -15,14 +15,8 @@ const CRYPTO_LIBS = {
   NODE: 'node'
 }
 
-// const algorithm = 'aes-256-gcm'
-// const dhBitDepth = 2048
-// const rsaBitDepth = 4096
-// const aesBitDepth = 256
-// const keySize = 32
-
 // Return the best available crypto lib based on feature detection in order
-// 1) webcrypto, 2) node crypto, 3) tweetnacl (chacha20poly1305).
+// 1) webcrypto, 2) node crypto, 3) tweetnacl (salsa20poly1305).
 const chooseCrypto = () => {
   if (helpers.hasWebCrypto()) return CRYPTO_LIBS.WEBCRYPTO
   if (!helpers.hasWebCrypto() && helpers.hasNodeCrypto()) return CRYPTO_LIBS.NODE
@@ -31,7 +25,7 @@ const chooseCrypto = () => {
 }
 
 const generateRandomBytes = ({
-  lib = CRYPTO_LIBS_WEBCRYPTO,
+  lib = CRYPTO_LIBS.WEBCRYPTO,
   size = 32
 }) => {
   switch(lib) {
@@ -123,6 +117,7 @@ const decrypt = ({
 // Combine functions from curve25519 + helpers and export all together with this
 // file's functions.
 module.exports = Object.assign({}, helpers, curve25519, {
+  CRYPTO_LIBS,
   chooseCrypto,
   encrypt,
   decrypt,

@@ -47,8 +47,8 @@ const encrypt_AES_GCM = (data, key) => new Promise((resolve, reject) => {
 
   resolve({
     data: encryptedData,
-    mac,
-    iv
+    iv,
+    mac
   })
 })
 

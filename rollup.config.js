@@ -22,7 +22,6 @@ export default {
       exclude: 'node_modules/**',
       ENV: JSON.stringify(process.env.NODE_ENV || 'development')
     }),
-    //(process.env.NODE_ENV === 'production' && uglify())
     uglify()
   ]
 }

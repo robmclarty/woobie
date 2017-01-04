@@ -3,14 +3,10 @@
 const test = require('tape')
 const woobie = require('../src/index.js')
 
-test('full test', t => {
-  t.plan(1)
-
+const fullTest = (t, alg, cryptolib) => {
   console.log('-----------------')
   console.log('choose crypto lib')
   console.log('-----------------')
-
-  const cryptolib = woobie.chooseCrypto()
 
   console.log('webcrypto: ', woobie.hasWebCrypto())
   console.log('nodecrypto: ', woobie.hasNodeCrypto())
@@ -68,7 +64,7 @@ test('full test', t => {
     msg: plainMsg,
     key: alice_sharedSecretStr,
     compressed: true,
-    alg: 'aes-cbc-hmac'
+    alg
   })
     .then(encryptedObj => {
       console.log('encrypted message: \n', encryptedObj.data)
@@ -80,7 +76,7 @@ test('full test', t => {
         iv: encryptedObj.iv,
         mac: encryptedObj.mac,
         compressed: true,
-        alg: 'aes-cbc-hmac'
+        alg
       })
     })
     .then(decryptedObj => {
@@ -88,4 +84,16 @@ test('full test', t => {
       t.equal(decryptedObj.data, plainMsg)
     })
     .catch(err => console.log('something went wrong: ', err))
+}
+
+test('full-test::node::aes-cbc-hmac', t => {
+  t.plan(1)
+
+  fullTest(t, 'aes-cbc-hmac', woobie.CRYPTO_LIBS.NODE)
+})
+
+test('full-test::node::aes-gcm', t => {
+  t.plan(1)
+
+  fullTest(t, 'aes-gcm', woobie.CRYPTO_LIBS.NODE)
 })

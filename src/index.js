@@ -45,28 +45,28 @@ const generateRandomBytes = ({
 // alg can be one of 'aes-cbc-hmac' or 'aes-gcm'
 const encrypt = ({
   lib = CRYPTO_LIBS.WEBCRYPTO,
-  msg = '',
+  data = '',
   key = '',
   compressed = true,
   alg = 'aes-cbc-hmac'
 }) => {
-  const msgAsBytes = compressed ?
-    helpers.compress(msg) :
-    Buffer.from(msg, 'utf8')
+  const dataAsBytes = compressed ?
+    helpers.compress(data) :
+    Buffer.from(data, 'utf8')
   const keyAsBytes = helpers.base64ToBytes(key)
   let encryptedPromise = {}
 
   switch (lib) {
   case CRYPTO_LIBS.NODE:
     encryptedPromise = alg === 'aes-gcm' ?
-      nodecrypto.encrypt_AES_GCM(msgAsBytes, keyAsBytes) :
-      nodecrypto.encrypt_AES_CBC_HMAC(msgAsBytes, keyAsBytes)
+      nodecrypto.encrypt_AES_GCM(dataAsBytes, keyAsBytes) :
+      nodecrypto.encrypt_AES_CBC_HMAC(dataAsBytes, keyAsBytes)
     break
   case CRYPTO_LIBS.WEBCRYPTO:
   default:
     encryptedPromise = alg == 'aes-gcm' ?
-      webcrypto.encrypt_AES_GCM(msgAsBytes, keyAsBytes) :
-      webcrypto.encrypt_AES_CBC_HMAC(msgAsBytes, keyAsBytes)
+      webcrypto.encrypt_AES_GCM(dataAsBytes, keyAsBytes) :
+      webcrypto.encrypt_AES_CBC_HMAC(dataAsBytes, keyAsBytes)
   }
 
   return encryptedPromise.then(encryptedData => ({
@@ -81,14 +81,14 @@ const encrypt = ({
 // return a decrypted, decompressed, utf8 string.
 const decrypt = ({
   lib = CRYPTO_LIBS.WEBCRYPTO,
-  msg = '',
+  data = '',
   key = '',
   iv = '',
   mac = '',
   compressed = true,
   alg = 'aes-cbc-hmac'
 }) => {
-  const msgAsBytes = helpers.base64ToBytes(msg)
+  const dataAsBytes = helpers.base64ToBytes(data)
   const keyAsBytes = helpers.base64ToBytes(key)
   const ivAsBytes = helpers.base64ToBytes(iv)
   const macAsBytes = helpers.base64ToBytes(mac)
@@ -97,14 +97,14 @@ const decrypt = ({
   switch (lib) {
   case CRYPTO_LIBS.NODE:
     decryptedPromise = alg === 'aes-gcm' ?
-      nodecrypto.decrypt_AES_GCM(msgAsBytes, keyAsBytes, ivAsBytes, macAsBytes) :
-      nodecrypto.decrypt_AES_CBC_HMAC(msgAsBytes, keyAsBytes, ivAsBytes, macAsBytes)
+      nodecrypto.decrypt_AES_GCM(dataAsBytes, keyAsBytes, ivAsBytes, macAsBytes) :
+      nodecrypto.decrypt_AES_CBC_HMAC(dataAsBytes, keyAsBytes, ivAsBytes, macAsBytes)
     break
   case CRYPTO_LIBS.WEBCRYPTO:
   default:
     decryptedPromise = alg === 'aes-gcm' ?
-      webcrypto.decrypt_AES_GCM(msgAsBytes, keyAsBytes, ivAsBytes, macAsBytes) :
-      webcrypto.decrypt_AES_CBC_HMAC(msgAsBytes, keyAsBytes, ivAsBytes, macAsBytes)
+      webcrypto.decrypt_AES_GCM(dataAsBytes, keyAsBytes, ivAsBytes, macAsBytes) :
+      webcrypto.decrypt_AES_CBC_HMAC(dataAsBytes, keyAsBytes, ivAsBytes, macAsBytes)
   }
 
   return decryptedPromise.then(decryptedData => ({

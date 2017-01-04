@@ -85,7 +85,7 @@ const decodeBase64 = str => decodeURIComponent(Buffer.from(str, 'base64').toStri
 // based on the data + key.
 const verifyMac = (data, key, mac, calculatedMac, length) => {
   if (mac.byteLength !== length || calculatedMac.byteLength < length) {
-    throw new Error('Bad MAC length')
+    throw new Error('bad MAC length')
   }
 
   const a = Uint8Array.from(calculatedMac)
@@ -103,12 +103,27 @@ const verifyMac = (data, key, mac, calculatedMac, length) => {
     return true
   }
 
-  if (result !== 0) {
-    console.log('calculated MAC: ', base64FromBytes(a))
-    console.log('original MAC: ', base64FromBytes(b))
-    throw new Error('bad MAC')
-  }
+  console.log('message could not be authenticated')
+  console.log('calculated MAC: ', base64FromBytes(a))
+  console.log('original MAC: ', base64FromBytes(b))
+  throw new Error('bad MAC')
 }
+
+// Couldn't get the webcrypto verify function to work here...
+// TODO: Try to use `crypto.subtle.verify` for a bit of a performance boost.
+// const verifyWebcrypto = (data, key, mac) => {
+//   return crypto.subtle.importKey('raw', key, { name: 'HMAC', hash: { name: 'SHA-256' } }, false, ['sign'])
+//     .then(importedKey => {
+//       console.log('data: ', data)
+//       console.log('mac: ', mac)
+//       return crypto.subtle.verify({ name: 'HMAC', hash: 'SHA-256' }, importedKey, mac, data)
+//     })
+//     .then(verified => {
+//       console.log('verified: ', verified)
+//       if (!verified) throw new Error('MAC could not be verified. Someone might have tampered with the message.')
+//     })
+//     .catch(err => console.log('error verifying mac: ', err))
+// }
 
 module.exports = {
   hasWebCrypto,

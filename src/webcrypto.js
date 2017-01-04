@@ -13,21 +13,6 @@ const sign = (data, key) => {
     .catch(err => console.log('error signing data: ', err))
 }
 
-// Couldn't get the webcrypto verify function to work here...
-// const verifyWebcrypto = (data, key, mac) => {
-//   return crypto.subtle.importKey('raw', key, { name: 'HMAC', hash: { name: 'SHA-256' } }, false, ['sign'])
-//     .then(importedKey => {
-//       console.log('data: ', data)
-//       console.log('mac: ', mac)
-//       return crypto.subtle.verify({ name: 'HMAC', hash: 'SHA-256' }, importedKey, mac, data)
-//     })
-//     .then(verified => {
-//       console.log('verified: ', verified)
-//       if (!verified) throw new Error('MAC could not be verified. Someone might have tampered with the message.')
-//     })
-//     .catch(err => console.log('error verifying mac: ', err))
-// }
-
 const verify = (data, key, mac, length) => {
   return sign(data, key)
     .then(calculatedMac => helpers.verifyMac(data, key, mac, calculatedMac, length))
@@ -37,6 +22,13 @@ const hash = data => {
   return crypto.subtle.digest({ name: 'SHA-512' }, data)
 }
 
+/**
+ * Takes a plain-text buffer and returns an encrypted buffer.
+ *
+ * @param {Uint8Array} data - The plain text message you want to encrypt.
+ * @param {Uint8Array} key - The secret key to use for encryption.
+ * @return {Object} An object containing ciphertext data, iv, and mac.
+ */
 const encrypt_AES_GCM = (data, key) => {
   console.log('-------------------------------------')
   console.log('encrypting with web crypto AES-GCM...')
@@ -53,9 +45,21 @@ const encrypt_AES_GCM = (data, key) => {
       data: new Uint8Array(encryptedData),
       iv
     }))
-    .catch(err => console.log('error encrypting message with webcrypto AES-GCM: ', err))
 }
 
+/**
+ * Takes a cipher-text buffer and returns a decrypted string.
+ *
+ * TODO: Separate/combine tag so webcrypto gcm is interoperable with other
+ * implementations (currently not using the `tag` parameter and can only
+ * decrypt messages generated with the above webcrypto encrypt function).
+ *
+ * @param {Uint8Array} data - The ciphertext message you want to decrypt.
+ * @param {Uint8Array} key - The secret key used to encrypt the ciphertext.
+ * @param {Uint8Array} iv - The initialization vecotr used in the encryption.
+ * @param {Uint8Array} mac - The authentication tag used by AES-GCM.
+ * @return {Object} An object containing the decrypted data.
+ */
 const decrypt_AES_GCM = (data, key, iv, mac) => {
   console.log('-------------------------------------')
   console.log('decrypting with web crypto AES-GCM...')
@@ -69,9 +73,15 @@ const decrypt_AES_GCM = (data, key, iv, mac) => {
     .then(decryptedData => ({
       data: decryptedData
     }))
-    .catch(err => console.log('error decrypting message with webcrypto AES-GCM: ', err))
 }
 
+/**
+ * Takes a plain-test buffer and returns an encrypted buffer.
+ *
+ * @param {Uint8Array} data - The plain text message you want to encrypt.
+ * @param {Uint8Array} key - The secret key to use for encryption.
+ * @return {Object} An object containing ciphertext data, iv, and mac.
+ */
 const encrypt_AES_CBC_HMAC = (data, key) => {
   console.log('------------------------------------------')
   console.log('encrypting with web crypto AES-CBC-HMAC...')
@@ -95,9 +105,17 @@ const encrypt_AES_CBC_HMAC = (data, key) => {
       iv,
       mac: new Uint8Array(mac)
     }))
-    .catch(err => console.log('error encrypting message with webcrypto aes-cbc: ', err))
 }
 
+/**
+ * Takes a cipher-text buffer and returns a decrypted string.
+ *
+ * @param {Uint8Array} data - The ciphertext message you want to decrypt.
+ * @param {Uint8Array} key - The secret key used to encrypt the ciphertext.
+ * @param {Uint8Array} iv - The initialization vecotr used in the encryption.
+ * @param {Uint8Array} mac - The SHA-512 auth code used by verify().
+ * @return {Object} An object containing the decrypted data.
+ */
 const decrypt_AES_CBC_HMAC = (data, key, iv, mac) => {
   console.log('------------------------------------------')
   console.log('decrypting with web crypto AES-CBC-HMAC...')
@@ -113,7 +131,6 @@ const decrypt_AES_CBC_HMAC = (data, key, iv, mac) => {
     .then(decryptedData => ({
       data: decryptedData
     }))
-    .catch(err => console.log('error decrypting message with webcrypto aes-cbc: ', err))
 }
 
 module.exports = {

@@ -26,21 +26,18 @@ const hash = data => new Promise((resolve, reject) => {
   resolve(hasher.digest())
 })
 
-// Takes a string or buffer and returns an encrypted buffer.
-// @param {Uint8Array} msg - The plain text message you want to encrypt.
-// @param {Uint8Array} key - The secret key to use for encryption.
+/**
+ * Takes a plain-text buffer and returns an encrypted buffer.
+ *
+ * @param {Uint8Array} data - The plain text message you want to encrypt.
+ * @param {Uint8Array} key - The secret key to use for encryption.
+ * @return {Object} An object containing ciphertext data, iv, and mac.
+ */
 const encrypt_AES_GCM = (data, key) => new Promise((resolve, reject) => {
-  console.log('--------------------------------------')
-  console.log('encrypting with node crypto AES-GCM...')
-  console.log('--------------------------------------')
-
   const iv = getRandomBytes(16)
-
-  console.log('iv: ', helpers.base64FromBytes(iv))
-  console.log('key: ', helpers.base64FromBytes(key))
-
   const encryptor = crypto.createCipheriv('aes-256-gcm', key, iv)
   let encryptedData = encryptor.update(data, 'utf8')
+
   encryptedData = Buffer.concat([encryptedData, encryptor.final()])
 
   const mac = encryptor.getAuthTag()
@@ -53,27 +50,24 @@ const encrypt_AES_GCM = (data, key) => new Promise((resolve, reject) => {
 })
 
 /**
- * Takes a string or buffer and returns a decrypted string.
+ * Takes a cipher-text buffer and returns a decrypted string.
  *
- * @param {Uint8Array} msg - The ciphertext message you want to decrypt.
+ * @param {Uint8Array} data - The ciphertext message you want to decrypt.
  * @param {Uint8Array} key - The secret key used to encrypt the ciphertext.
  * @param {Uint8Array} iv - The initialization vecotr used in the encryption.
- * @param {Uint8Array} tag - The authentication tag used by AES-GCM.
+ * @param {Uint8Array} mac - The authentication tag used by AES-GCM.
  * @return {Object} An object containing the decrypted data.
  */
 const decrypt_AES_GCM = (data, key, iv, mac) => new Promise((resolve, reject) => {
-  console.log('--------------------------------------')
-  console.log('decrypting with node crypto AES-GCM...')
-  console.log('--------------------------------------')
-
-  console.log('key: ', helpers.base64FromBytes(key))
-  console.log('iv: ', helpers.base64FromBytes(iv))
-  console.log('mac: ', helpers.base64FromBytes(mac))
-
   const decryptor = crypto.createDecipheriv('aes-256-gcm', key, iv)
-  decryptor.setAuthTag(mac)
 
-  let decryptedData = decryptor.update(data)
+  // Verify authenticity of ciphertext with mac.
+  // decryptor.setAuthTag(mac)
+  //
+  // let decryptedData = decryptor.update(data)
+
+  let decryptedData = decryptor.setAuthTag(mac).update(data)
+
   decryptedData = Buffer.concat([decryptedData, decryptor.final()])
 
   resolve({
@@ -81,18 +75,18 @@ const decrypt_AES_GCM = (data, key, iv, mac) => new Promise((resolve, reject) =>
   })
 })
 
+/**
+ * Takes a plain-text buffer and returns an encrypted buffer.
+ *
+ * @param {Uint8Array} data - The plain text message you want to encrypt.
+ * @param {Uint8Array} key - The secret key to use for encryption.
+ * @return {Object} An object containing ciphertext data, iv, and mac.
+ */
 const encrypt_AES_CBC_HMAC = (data, key) => new Promise((resolve, reject) => {
-  console.log('-------------------------------------------')
-  console.log('encrypting with node crypto AES-CBC-HMAC...')
-  console.log('-------------------------------------------')
-
   const iv = getRandomBytes(16)
-
-  console.log('iv: ', helpers.base64FromBytes(iv))
-  console.log('key: ', helpers.base64FromBytes(key))
-
   const encryptor = crypto.createCipheriv('aes-256-cbc', key, iv)
   let encryptedData = encryptor.update(data, 'utf8')
+
   encryptedData = Buffer.concat([encryptedData, encryptor.final()])
 
   sign(encryptedData, key)
@@ -101,29 +95,31 @@ const encrypt_AES_CBC_HMAC = (data, key) => new Promise((resolve, reject) => {
       iv,
       mac
     }))
-    .catch(err => console.log('error encrypting message with nodecrypto aes-cbc: ', err))
+    .catch(reject)
 })
 
+/**
+ * Takes a cipher-text buffer and returns a decrypted string.
+ *
+ * @param {Uint8Array} data - The ciphertext message you want to decrypt.
+ * @param {Uint8Array} key - The secret key used to encrypt the ciphertext.
+ * @param {Uint8Array} iv - The initialization vecotr used in the encryption.
+ * @param {Uint8Array} mac - The SHA-512 auth code used by verify().
+ * @return {Object} An object containing the decrypted data.
+ */
 const decrypt_AES_CBC_HMAC = (data, key, iv, mac) => new Promise((resolve, reject) => {
-  console.log('-------------------------------------------')
-  console.log('decrypting with node crypto AES-CBC-HMAC...')
-  console.log('-------------------------------------------')
-
-  console.log('key: ', helpers.base64FromBytes(key))
-  console.log('iv: ', helpers.base64FromBytes(iv))
-  console.log('mac: ', helpers.base64FromBytes(mac))
-
   return verify(data, key, mac, mac.byteLength)
     .then(() => {
       const decryptor = crypto.createDecipheriv('aes-256-cbc', key, iv)
       let decryptedData = decryptor.update(data)
+
       decryptedData = Buffer.concat([decryptedData, decryptor.final()])
 
       resolve({
         data: decryptedData
       })
     })
-    .catch(err => console.log('error decrypting message with nodecrypto aes-cbc: ', err))
+    .catch(reject)
 })
 
 module.exports = {

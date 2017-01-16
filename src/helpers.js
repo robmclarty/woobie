@@ -91,9 +91,7 @@ const verifyMac = (data, key, mac, calculatedMac, length) => {
   const a = Uint8Array.from(calculatedMac)
   const b = Uint8Array.from(mac)
 
-  const result = a.reduce((r, el, i) => {
-    return r | (a[i] ^ b[i])
-  }, 0)
+  const result = a.reduce((r, el, i) => r | (a[i] ^ b[i]), 0)
 
   if (result === 0) {
     console.log('*message is authentic*')

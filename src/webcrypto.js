@@ -8,18 +8,26 @@ const getRandomBytes = size => {
 }
 
 const sign = (data, key) => {
+  console.log('signing...')
+  console.log('data: ', data)
+  console.log('key: ', key)
   return crypto.subtle.importKey('raw', key, { name: 'HMAC', hash: { name: 'SHA-256' } }, false, ['sign'])
     .then(importedKey => crypto.subtle.sign({ name: 'HMAC', hash: 'SHA-256' }, importedKey, data))
     .catch(err => console.log('error signing data: ', err))
 }
 
 const verify = (data, key, mac, length) => {
+  console.log('verifying...')
+  console.log('mac: ', mac)
   return sign(data, key)
-    .then(calculatedMac => helpers.verifyMac(data, key, mac, calculatedMac, length))
+    .then(calculatedMac => {
+      console.log('new mac: ', calculatedMac)
+      return helpers.verifyMac(data, key, mac, calculatedMac, length)
+    })
 }
 
 const hash = data => {
-  return crypto.subtle.digest({ name: 'SHA-512' }, data)
+  return crypto.subtle.digest({ name: 'SHA-256' }, data)
 }
 
 /**

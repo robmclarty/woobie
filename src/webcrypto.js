@@ -12,14 +12,15 @@ const sign = (data, key) => {
   console.log('data: ', helpers.base64FromBytes(data))
   console.log('key: ', helpers.base64FromBytes(key))
 
-  return crypto.subtle.importKey('raw', key, { name: 'HMAC', hash: { name: 'SHA-256' } }, false, ['sign'])
-    .then(importedKey => {
-      console.log('importedKey: ', importedKey)
-      return crypto.subtle.sign({ name: 'HMAC', hash: 'SHA-256' }, importedKey, data)
-        .then(hash => {
-          console.log('hash: ', helpers.base64FromBytes(hash))
-          return hash
-        })
+  return crypto.subtle.importKey('raw', key, { name: 'HMAC', hash: { name: 'SHA-256' } }, true, ['sign'])
+    .then(cryptoKey => {
+      console.log('cryptoKey: ', cryptoKey)
+
+      return crypto.subtle.sign({ name: 'HMAC', hash: 'SHA-256' }, cryptoKey, data)
+    })
+    .then(hash => {
+      console.log('hash: ', helpers.base64FromBytes(hash))
+      return hash
     })
     .catch(err => console.log('error signing data: ', err))
 }
@@ -27,11 +28,22 @@ const sign = (data, key) => {
 const verify = (data, key, mac, length) => {
   console.log('verifying...')
   console.log('mac: ', helpers.base64FromBytes(mac))
-  return sign(data, key)
-    .then(calculatedMac => {
-      console.log('new mac: ', helpers.base64FromBytes(calculatedMac))
-      return helpers.verifyMac(data, key, mac, calculatedMac, length)
+
+  return crypto.subtle.importKey('raw', key, { name: 'HMAC', hash: { name: 'SHA-256' } }, true, ['sign'])
+    .then(cryptoKey => {
+      console.log('cryptoKey: ', cryptoKey)
+      return crypto.subtle.verify({ name: 'HMAC', hash: 'SHA-256' }, cryptoKey, mac, data)
     })
+    .then(isVerified => {
+      console.log('isVerified: ', isVerified)
+    })
+    .catch(err => console.log('error verifying data: ', err))
+
+  // return sign(data, key)
+  //   .then(calculatedMac => {
+  //     console.log('new mac: ', helpers.base64FromBytes(calculatedMac))
+  //     return helpers.verifyMac(data, key, mac, calculatedMac, length)
+  //   })
 }
 
 const hash = data => {

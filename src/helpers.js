@@ -86,12 +86,14 @@ const decodeBase64 = str => decodeURIComponent(Buffer.from(str, 'base64').toStri
 const verifyMac = (data, key, mac, calculatedMac, length) => {
   console.log('passed calc mac: ', calculatedMac)
 
-  if (mac.byteLength !== length || calculatedMac.byteLength < length || calculatedMac.length === 0) {
-    throw new Error('bad MAC length')
-  }
-
   const a = Uint8Array.from(calculatedMac)
   const b = Uint8Array.from(mac)
+
+  if (mac.byteLength !== length ||
+      calculatedMac.byteLength < length ||
+      a.length === 0) {
+    throw new Error('bad MAC length')
+  }
 
   console.log('a: ', a)
   console.log('b: ', b)

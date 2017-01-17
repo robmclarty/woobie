@@ -8,47 +8,22 @@ const getRandomBytes = size => {
 }
 
 const sign = (data, key) => {
-  console.log('signing...')
-  console.log('data: ', helpers.base64FromBytes(data))
-  console.log('key: ', helpers.base64FromBytes(key))
-
   return crypto.subtle.importKey('raw', key, { name: 'HMAC', hash: { name: 'SHA-256' } }, true, ['sign'])
-    .then(cryptoKey => {
-      console.log('cryptoKey: ', cryptoKey)
-
-      return crypto.subtle.sign({ name: 'HMAC', hash: 'SHA-256' }, cryptoKey, data)
-    })
-    .then(hash => {
-      console.log('hash: ', helpers.base64FromBytes(hash))
-      return hash
-    })
-    .catch(err => console.log('error signing data: ', err))
+    .then(cryptoKey => crypto.subtle.sign({ name: 'HMAC', hash: 'SHA-256' }, cryptoKey, data))
 }
 
 const verify = (data, key, mac, length) => {
-  console.log('verifying...')
-  console.log('mac: ', helpers.base64FromBytes(mac))
-
-  const tamperedData = helpers.base64FromBytes(data).replace('0', '1')
-
-  console.log('tampered data: ', tamperedData)
-
   return crypto.subtle.importKey('raw', key, { name: 'HMAC', hash: { name: 'SHA-256' } }, true, ['verify'])
-    .then(cryptoKey => {
-      console.log('cryptoKey: ', cryptoKey)
-      return crypto.subtle.verify({ name: 'HMAC', hash: 'SHA-256' }, cryptoKey, mac, helpers.base64ToBytes(tamperedData))
-    })
+    .then(cryptoKey => crypto.subtle.verify({ name: 'HMAC', hash: 'SHA-256' }, cryptoKey, mac, data))
     .then(isVerified => {
-      console.log('isVerified: ', isVerified)
-      if (!isVerified) throw 'bad MAC'
+      if (!isVerified) {
+        console.log('message could not be authenticated')
+        throw 'bad MAC'
+      }
+
+      console.log('*message is authentic*')
       return isVerified
     })
-
-  // return sign(data, key)
-  //   .then(calculatedMac => {
-  //     console.log('new mac: ', helpers.base64FromBytes(calculatedMac))
-  //     return helpers.verifyMac(data, key, mac, calculatedMac, length)
-  //   })
 }
 
 const hash = data => {

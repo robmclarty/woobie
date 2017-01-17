@@ -423,3 +423,16 @@ test('node::aes-cbc-hmac::invalid-shared-secret-encrypt', t => {
       )
     })
 })
+
+test('node::aes-cbc-hmac::bad-mac', t => {
+  t.plan(1)
+
+  const nodecrypto = require('../src/nodecrypto')
+  const data = woobie.base64ToBytes('P4M4jo0TsxJiWAV9ehA25w==')
+  const key = woobie.base64ToBytes('OFdDTSPGCLt4BOHjs1XTbE5Mn0FTEaOgvXW7HEylegc=')
+  const mac = woobie.base64ToBytes('JkEathlLadeq3z4gAuhmtXdyhJBTeyeGY6yitf5vx9k=')
+
+  nodecrypto.verify(data, key, mac, mac.byteLength)
+    .then(isAuthentic => t.ok(isAuthentic))
+    .catch(err => console.log('something went wrong: ', err))
+})

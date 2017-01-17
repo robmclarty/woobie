@@ -29,7 +29,7 @@ const verify = (data, key, mac, length) => {
   console.log('verifying...')
   console.log('mac: ', helpers.base64FromBytes(mac))
 
-  return crypto.subtle.importKey('raw', key, { name: 'HMAC', hash: { name: 'SHA-256' } }, true, ['sign'])
+  return crypto.subtle.importKey('raw', key, { name: 'HMAC', hash: { name: 'SHA-256' } }, true, ['verify'])
     .then(cryptoKey => {
       console.log('cryptoKey: ', cryptoKey)
       return crypto.subtle.verify({ name: 'HMAC', hash: 'SHA-256' }, cryptoKey, mac, data)

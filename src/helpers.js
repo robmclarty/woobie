@@ -84,7 +84,7 @@ const decodeBase64 = str => decodeURIComponent(Buffer.from(str, 'base64').toStri
 // TODO: Perhaps rewrite so that this function encapsulates the MAC calculation
 // based on the data + key.
 const verifyMac = (data, key, mac, calculatedMac, length) => {
-  console.log('passed calc mac: ', calculatedMac)
+  console.log('passed calc mac: ', calculatedMac.byteLength)
 
   if (mac.byteLength !== length || calculatedMac.byteLength < length) {
     throw new Error('bad MAC length')
@@ -92,6 +92,9 @@ const verifyMac = (data, key, mac, calculatedMac, length) => {
 
   const a = Uint8Array.from(calculatedMac)
   const b = Uint8Array.from(mac)
+
+  console.log('a: ', a)
+  console.log('b: ', b)
 
   const result = a.reduce((r, el, i) => {
     return r | (a[i] ^ b[i])

@@ -16,6 +16,10 @@ const sign = (data, key) => {
     .then(importedKey => {
       console.log('importedKey: ', importedKey)
       return crypto.subtle.sign({ name: 'HMAC', hash: 'SHA-256' }, importedKey, data)
+        .then(hash => {
+          console.log('hash: ', hash)
+          return hash
+        })
     })
     .catch(err => console.log('error signing data: ', err))
 }

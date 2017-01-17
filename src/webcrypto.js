@@ -29,7 +29,7 @@ const verify = (data, key, mac, length) => {
   console.log('verifying...')
   console.log('mac: ', helpers.base64FromBytes(mac))
 
-  const tamperedData = helpers.base64FromBytes(data)
+  let tamperedData = helpers.base64FromBytes(data)
   tamperedData[5] = '4'
 
   console.log('tampered data: ', tamperedData)

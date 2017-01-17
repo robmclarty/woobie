@@ -9,7 +9,7 @@ export default {
   moduleName: 'woobie',
   entry: 'src/index.js',
   dest: 'build/woobie.js',
-  format: 'iife',
+  format: 'cjs',
   sourceMap: true,
   plugins: [
     resolve({

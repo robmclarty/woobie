@@ -29,10 +29,15 @@ const verify = (data, key, mac, length) => {
   console.log('verifying...')
   console.log('mac: ', helpers.base64FromBytes(mac))
 
+  const tamperedData = helpers.base64FromBytes(data)
+  tamperedData[5] = '4'
+
+  console.log('tampered data: ', tamperedData)
+
   return crypto.subtle.importKey('raw', key, { name: 'HMAC', hash: { name: 'SHA-256' } }, true, ['verify'])
     .then(cryptoKey => {
       console.log('cryptoKey: ', cryptoKey)
-      return crypto.subtle.verify({ name: 'HMAC', hash: 'SHA-256' }, cryptoKey, mac, data)
+      return crypto.subtle.verify({ name: 'HMAC', hash: 'SHA-256' }, cryptoKey, mac, helpers.base64ToBytes(tamperedData))
     })
     .then(isVerified => {
       console.log('isVerified: ', isVerified)

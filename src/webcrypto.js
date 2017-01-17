@@ -40,8 +40,9 @@ const verify = (data, key, mac, length) => {
     })
     .then(isVerified => {
       console.log('isVerified: ', isVerified)
+      if (!isVerified) throw 'bad MAC'
+      return isVerified
     })
-    .catch(err => console.log('error verifying data: ', err))
 
   // return sign(data, key)
   //   .then(calculatedMac => {

@@ -23,8 +23,8 @@ const encrypt = ({
     Buffer.from(data, 'utf8')
   const keyAsBytes = helpers.base64ToBytes(key)
   const encryptedPromise = alg == 'aes-gcm' ?
-    webcrypto.encrypt_AES_GCM(msgAsBytes, keyAsBytes) :
-    webcrypto.encrypt_AES_CBC_HMAC(msgAsBytes, keyAsBytes)
+    webcrypto.encrypt_AES_GCM(dataAsBytes, keyAsBytes) :
+    webcrypto.encrypt_AES_CBC_HMAC(dataAsBytes, keyAsBytes)
 
   return encryptedPromise.then(encryptedData => ({
     data: helpers.base64FromBytes(encryptedData.data),

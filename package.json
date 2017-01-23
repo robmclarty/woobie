@@ -1,6 +1,6 @@
 {
   "name": "woobie",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "A multi-layered encryption protocol for wrapping your messages in end-to-end security.",
   "main": "build/woobie.js",
   "scripts": {

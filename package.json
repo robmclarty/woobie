@@ -1,12 +1,12 @@
 {
   "name": "woobie",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "description": "A multi-layered encryption protocol for wrapping your messages in end-to-end security.",
   "main": "./build/woobie.js",
   "scripts": {
     "rollup": "node_modules/.bin/rollup -c",
     "test": "tape tests/index.js | node_modules/.bin/tap-spec",
-    "prepublish": "gulp build"
+    "prepublish": "npm run rollup"
   },
   "repository": {
     "type": "git",

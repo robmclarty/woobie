@@ -13,20 +13,6 @@ const hasWebCrypto = () => {
     typeof window.crypto.getRandomValues === 'function'
 }
 
-// TODO: do this better without including the full node lib here.
-const hasNodeCrypto = () => {
-  const crypto = require('crypto')
-
-  if (typeof crypto.getCiphers !== 'function') return false
-
-  const ciphers = crypto.getCiphers()
-
-  return ciphers && (
-    ciphers.includes('aes-256-gcm') ||
-    ciphers.includes('aes-256-cbc')
-  )
-}
-
 // conversion
 // ----------
 
@@ -53,6 +39,7 @@ const hexFromBytes = byteArray => {
 
 // Take a hex-encoded string and return a Uint8Array representation of it.
 const hexToBytes = hexString => {
+  if (typeof hexString !== 'string') throw 'parameter must be a string'
   if (hexString.length % 2 !== 0) throw 'Must have an even number of hex digits to convert to bytes'
 
   return Uint8Array.from(hexString.split(/.{1,2}/g).map((char, i) => {
@@ -134,7 +121,6 @@ const verifyMac = (data, key, mac, calculatedMac, length) => {
 
 module.exports = {
   hasWebCrypto,
-  hasNodeCrypto,
   base64ToBytes,
   base64FromBytes,
   hexToBytes,

@@ -12,9 +12,10 @@ const buffer = require('vinyl-buffer')
 // 'public/js/application.js' as ES5.
 gulp.task('build:scripts', function () {
   const browserifyOpts = {
-    entries: ['./src'],
-    debug: true,
-    fullPaths: false
+    entries: ['./src/index.js'],
+    debug: false,
+    fullPaths: false,
+    standalone: true
   }
   const babelOpts = {
     presets: ['es2015'],
